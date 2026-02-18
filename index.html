@@ -205,6 +205,7 @@
     .window-players-list { display:none; width:100%; padding:6px 11px 8px 90px; background:var(--tab-hover); border-top:1px solid var(--border-sub); gap:5px; flex-wrap:wrap; font-size:.77em; }
     .window-players-list.open { display:flex; }
     .wl-label { font-size:.7em; color:var(--text-faint); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; margin-right:4px; align-self:center; }
+    .wl-label { font-size:.7em; color:var(--text-faint); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; margin-right:4px; align-self:center; }
     .player-chip { background:var(--chip-bg); border:1px solid var(--chip-bd); border-radius:20px; padding:1px 8px; font-family:'Barlow Condensed',sans-serif; font-weight:600; letter-spacing:1px; text-transform:uppercase; font-size:.84em; color:var(--chip-c); }
 
     /* LEGEND */
@@ -269,7 +270,7 @@
     .info-label { font-weight:600; color:var(--text-sec); font-size:.82em; flex-shrink:0; }
     .info-value { color:var(--text-pri); font-size:.82em; text-align:right; }
     .schedule-grid { display:grid; gap:5px; }
-    .day-schedule { background:var(--bg-subtle); padding:8px 10px; border-radius:6px; border-left:2px solid var(--accent2); border:1px solid var(--border-sub); border-left:2px solid var(--accent2); }
+    .day-schedule { background:var(--bg-subtle); padding:8px 10px; border-radius:6px; border:1px solid var(--border-sub); border-left:2px solid var(--accent2); }
     .day-schedule h4 { font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:.76em; color:var(--accent2); margin-bottom:3px; }
     .hours-display { color:var(--text-sec); font-size:.82em; font-family:'JetBrains Mono',monospace; line-height:1.5; }
     .no-availability { color:var(--text-faint); font-style:italic; font-family:inherit; }
@@ -290,6 +291,9 @@
         .tab-content { padding:12px; }
         .controls { grid-template-columns:1fr 1fr; }
     }
+    .status-toast { display:none; position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 18px; border-radius:6px; font-size:.84em; font-weight:600; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; box-shadow:0 4px 16px rgba(0,0,0,.2); }
+    .toast-ok { background:#1a7f37; color:#fff; }
+    .toast-error { background:#cc4444; color:#fff; }
 ```
 
 </style>
@@ -347,7 +351,7 @@
         <table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table>
     </div>
     <div class="legend">
-        <div class="legend-item"><div class="legend-color" style="background:var(--c0-bg);border:1px solid var(--border-subtle)"></div><span>0</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--c0-bg);border:1px solid var(--border-sub)"></div><span>0</span></div>
         <div class="legend-item"><div class="legend-color" style="background:linear-gradient(90deg,var(--c1-bg),var(--c2-bg))"></div><span>1–2</span></div>
         <div class="legend-item"><div class="legend-color" style="background:linear-gradient(90deg,var(--c3-bg),var(--c4-bg))"></div><span>3–4</span></div>
         <div class="legend-item"><div class="legend-color" style="background:var(--c5-bg);border-left:3px solid var(--c5-ac)"></div><span>5 — Match ready</span></div>
@@ -367,26 +371,27 @@
     </div>
     <div class="form-section">
         <h3>Player Information</h3>
-        <div class="controls">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;">
             <div class="control-group">
                 <label>Your name</label>
                 <select id="updatePlayerSelect" onchange="loadPlayerData()"><option value="">Select your name</option></select>
             </div>
             <div class="control-group">
                 <label>Your timezone</label>
-                <select id="updateTimezone">
+                <select id="updateTimezone" onchange="onPlayerTimezoneChange()">
                     <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
                     <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
                     <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
                     <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
                     <option value="UTC+5:30">UTC+5:30 (India)</option>
                 </select>
+                <span style="font-size:.7em;color:var(--text-sec);margin-top:3px;display:block;">Schedule times shown in your timezone</span>
             </div>
         </div>
     </div>
     <div class="exceptions-section">
         <h4>⚡ Special Dates / Exceptions</h4>
-        <p style="color:var(--text-muted);font-size:.82em;margin-bottom:9px;">Override your regular schedule for a specific date.</p>
+        <p style="color:var(--text-sec);font-size:.82em;margin-bottom:9px;">Override your regular schedule for a specific date.</p>
         <div id="exceptionsContainer"></div>
         <button class="btn-add-exception" onclick="addExceptionRow()">+ Add Exception Date</button>
     </div>
@@ -406,7 +411,7 @@
 <!-- TAB 3 -->
 <div id="players" class="tab-content">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-        <h3 style="color:var(--text-primary);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;">Team Members</h3>
+        <h3 style="color:var(--text-pri);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;">Team Members</h3>
         <button class="btn btn-secondary" onclick="openAddPlayer()">+ Add Player</button>
     </div>
     <div class="player-list" id="playersList"></div>
@@ -440,8 +445,6 @@
 
 <div id="playerModal" class="modal">
     <div class="modal-content" id="modalPlayerContent"></div>
-</div>
-
 </div>
 
 <script>
@@ -580,7 +583,7 @@ function updateView(){
         });
     });
 
-    const todayStr=new Date().toISOString().split('T')[0];
+    const d=new Date(); const todayStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     let hHTML=`<tr><th>Time (${userTZ})</th>`;
     selD.forEach(day=>{
         const ds=ddm[day]||'', isToday=ds===todayStr;
@@ -637,7 +640,7 @@ function updateBestTimes(av,userTZ,selD){
     grouped.sort((a,b)=>b.peak-a.peak||a.startUTC-b.startUTC);
     const total=raw.length;
     const sub=total===0?'':`${total} slot${total!==1?'s':''} · ${grouped.length} group${grouped.length!==1?'s':''} · click to expand`;
-    let html=`<div class="best-windows-header"><h3>▶ Best Windows To Play</h3><span style="font-size:.7em;color:var(--text-muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">${sub}</span></div>`;
+    let html=`<div class="best-windows-header"><h3>▶ Best Windows To Play</h3><span style="font-size:.7em;color:var(--text-sec);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">${sub}</span></div>`;
     if(grouped.length>0){
         html+='<div class="windows-list">';
         grouped.forEach((w,idx)=>{
@@ -655,34 +658,89 @@ function updateBestTimes(av,userTZ,selD){
                 +   '<span class="window-day">' + ds + '</span>'
                 +   '<span class="window-time">' + s + ' – ' + e + ' ' + userTZ + '</span>'
                 +   '<span class="window-badge ' + bc + '">' + bl + '</span>'
-                +   '<span class="window-players-toggle" id="tg-' + idx + '">▾ ' + w.peakP.length + '</span>'
+                +   '<span class="window-players-toggle" id="tg-' + idx + '" data-count="' + w.peakP.length + '">▾ ' + w.peakP.length + '</span>'
                 + '</div>'
                 + '<div class="window-players-list" id="wp-' + idx + '">' + dayChips + chips + '</div>'
                 + '</div>';
         });
         html+='</div>';
-    } else { html+=`<p style="color:var(--text-muted);font-size:.84em;padding:6px 0">No windows with 5+ players found.</p>`; }
+    } else { html+=`<p style="color:var(--text-sec);font-size:.84em;padding:6px 0">No windows with 5+ players found.</p>`; }
     document.getElementById('bestTimes').innerHTML=html;
 }
-function toggleWP(idx){ const l=document.getElementById('wp-'+idx),t=document.getElementById('tg-'+idx),o=l.classList.toggle('open'); t.textContent=o?'▴ hide':'▾ '+l.children.length; }
+function toggleWP(idx){ const l=document.getElementById('wp-'+idx),t=document.getElementById('tg-'+idx),o=l.classList.toggle('open'); t.textContent=o?'▴ hide':'▾ '+t.dataset.count; }
 
 function resetFilters(){ document.getElementById('userTimezone').value='UTC'; for(let o of document.getElementById('playerFilter').options)o.selected=true; for(let o of document.getElementById('dayFilter').options)o.selected=true; updateView(); }
 function switchTab(n,e){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); if(e?.target)e.target.classList.add('active'); document.getElementById(n).classList.add('active'); }
 
+// ── Timezone helpers for the schedule form ───────────────────────────────────
+// Each checkbox id="${day}-${utcHour}" — UTC is always the internal key.
+// Labels show local time; checked state is managed in UTC.
+
+function getFormTZ(){
+    return document.getElementById('updateTimezone')?.value || 'UTC';
+}
+
+// UTC hour → local display hour for the form's selected timezone
+function utcToLocal(utcH, tz){ return (utcH + parseTimezone(tz) + 24) % 24; }
+// Local display hour → UTC hour
+function localToUtc(localH, tz){ return (localH - parseTimezone(tz) + 24) % 24; }
+
 function generateDayForms(){
-    let h='';
-    DAYS.forEach(day=>{ h+=`<div class="day-section"><h4>${day}</h4><div class="time-grid" id="day-${day}">`; for(let i=0;i<24;i++) h+=`<div class="time-slot"><input type="checkbox" id="${day}-${i}" value="${i}"><label for="${day}-${i}">${i.toString().padStart(2,'0')}:00</label></div>`; h+='</div></div>'; });
-    document.getElementById('daysContainer').innerHTML=h;
+    const tz = getFormTZ();
+    let h = '';
+    DAYS.forEach(day => {
+        h += `<div class="day-section"><h4>${day}</h4><div class="time-grid" id="day-${day}">`;
+        for(let i = 0; i < 24; i++){
+            const localH = utcToLocal(i, tz);
+            const label = localH.toString().padStart(2,'0') + ':00';
+            h += `<div class="time-slot"><input type="checkbox" id="${day}-${i}" value="${i}"><label for="${day}-${i}" id="lbl-${day}-${i}">${label}</label></div>`;
+        }
+        h += '</div></div>';
+    });
+    document.getElementById('daysContainer').innerHTML = h;
 }
+
+// Relabel all checkboxes when timezone changes (does NOT move checks)
+function relabelFormTimes(){
+    const tz = getFormTZ();
+    DAYS.forEach(day => {
+        for(let i = 0; i < 24; i++){
+            const lbl = document.getElementById(`lbl-${day}-${i}`);
+            if(lbl) lbl.textContent = utcToLocal(i, tz).toString().padStart(2,'0') + ':00';
+        }
+    });
+}
+
+// When timezone select changes: relabel + shift existing checks to new tz
+function onPlayerTimezoneChange(){
+    // Read current checks as UTC, then reapply after relabeling
+    // (checks are always stored against UTC-keyed IDs, so just relabel)
+    relabelFormTimes();
+    // Also update the tz label in save bar if needed
+    const name = document.getElementById('updatePlayerSelect').value;
+    if(name) document.getElementById('saveBarLabel').textContent = `Editing: ${name}`;
+}
+
 function loadPlayerData(){
-    const name=document.getElementById('updatePlayerSelect').value; if(!name||!teamData[name]) return;
-    const data=teamData[name];
-    document.getElementById('updateTimezone').value=data.timezone||'UTC';
-    document.getElementById('playerNotes').value=data.notes||'';
-    document.getElementById('saveBarLabel').textContent=`Editing: ${name}`;
-    DAYS.forEach(day=>{ for(let h=0;h<24;h++){ const cb=document.getElementById(`${day}-${h}`); if(cb) cb.checked=(data.availability?.[day]||[]).includes(h); } });
-    loadExceptions(data.exceptions||[]);
+    const name = document.getElementById('updatePlayerSelect').value;
+    if(!name || !teamData[name]) return;
+    const data = teamData[name];
+    const tz = data.timezone || 'UTC';
+    document.getElementById('updateTimezone').value = tz;
+    document.getElementById('playerNotes').value = data.notes || '';
+    document.getElementById('saveBarLabel').textContent = `Editing: ${name}`;
+    // Relabel for this player's timezone
+    relabelFormTimes();
+    // Check the UTC hours from stored data (IDs are UTC-based)
+    DAYS.forEach(day => {
+        for(let h = 0; h < 24; h++){
+            const cb = document.getElementById(`${day}-${h}`);
+            if(cb) cb.checked = (data.availability?.[day] || []).includes(h);
+        }
+    });
+    loadExceptions(data.exceptions || []);
 }
+
 function selectAllTimes(){ DAYS.forEach(day=>{ for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=true;} }); }
 function clearAllTimes(){ DAYS.forEach(day=>{ for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=false;} }); }
 function copyDay(){ const mh=[]; for(let h=0;h<24;h++){const cb=document.getElementById(`Monday-${h}`);if(cb&&cb.checked)mh.push(h);} DAYS.slice(1).forEach(day=>{for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=mh.includes(h);}}); }
@@ -767,23 +825,24 @@ function confirmAddPlayer(){
 function deleteCurrentPlayer(){
     const name=document.getElementById('updatePlayerSelect').value;
     if(!name){ alert('Select a player first.'); return; }
-    deletePlayer(name);
+    if(!confirm(`Remove "${name}" from the roster? This cannot be undone.`)) return;
+    delete teamData[name];
     document.getElementById('saveBarLabel').textContent='Select your name to start editing';
     document.getElementById('updatePlayerSelect').value='';
+    populatePlayerSelects(); updateView(); updatePlayersList();
+    deletePlayerFromAPI(name)
+        .then(()=>showStatus('🗑 ' + name + ' removed'))
+        .catch(()=>showStatus('⚠️ Removed locally — server delete failed', true));
 }
 
 async function deletePlayer(name){
     if(!confirm(`Remove "${name}" from the roster? This cannot be undone.`)) return;
     delete teamData[name];
-    populatePlayerSelects();
-    updateView();
-    updatePlayersList();
-    closePlayerModal();
+    populatePlayerSelects(); updateView(); updatePlayersList(); closePlayerModal();
     try {
         await deletePlayerFromAPI(name);
         showStatus('🗑 ' + name + ' removed');
     } catch(e) {
-        console.error('Delete error:', e);
         showStatus('⚠️ Removed locally — server delete failed', true);
     }
 }
@@ -792,7 +851,6 @@ window.onclick=e=>{
     if(e.target===document.getElementById('playerModal')) closePlayerModal(); 
     if(e.target===document.getElementById('addPlayerModal')) closeAddPlayer();
 };
-window.onclick=e=>{ if(e.target===document.getElementById('playerModal')) closePlayerModal(); };
 
 function formatHours(hours){
     if(!hours.length) return '';
