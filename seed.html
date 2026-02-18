@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FTB — Seed Data</title>
+    <style>
+        body { font-family: monospace; background: #0d1117; color: #e6edf3; padding: 40px; max-width: 600px; margin: 0 auto; }
+        h1 { color: #ff006e; margin-bottom: 8px; }
+        p { color: #8b949e; margin-bottom: 24px; font-size: .9em; }
+        button { background: #ff006e; color: #fff; border: none; padding: 12px 28px; border-radius: 6px; font-size: 1em; font-weight: 700; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+        button:disabled { opacity: .5; cursor: not-allowed; }
+        #log { margin-top: 24px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; font-size: .82em; line-height: 1.8; white-space: pre-wrap; }
+        .ok { color: #3fb950; }
+        .err { color: #ff7b72; }
+        .info { color: #8b949e; }
+    </style>
+</head>
+<body>
+    <h1>FTB — Seed Redis</h1>
+    <p>This page uploads all initial player data to Redis.<br>
+    <strong>Open this page on your deployed site</strong> (e.g. ftb-scheduler.vercel.app/seed.html)<br>
+    Delete this file from GitHub after running it.</p>
+    <button id="btn" onclick="runSeed()">▶ Upload All Players</button>
+    <div id="log"></div>
+
+<script>
+const initialTeamData = {
+    TOM:{timezone:'UTC',availability:{Monday:[13,14,15,16,17,18,19,20,21],Tuesday:[13,14,15,16,17,18,19,20,21],Wednesday:[13,14,15,16,17,18,19,20,21],Thursday:[13,14,15,16,17,18,19,20,21],Friday:[13,14,15,16,17,18,19,20,21],Saturday:[],Sunday:[]},notes:'Weekends sketchy',exceptions:[]},
+    KIYO:{timezone:'UTC+5:30',availability:{Monday:[15,16,17,18,19,20,21,22,23,0],Tuesday:[15,16,17,18,19,20,21,22,23,0],Wednesday:[15,16,17,18,19,20,21,22,23,0],Thursday:[15,16,17,18,19,20,21,22,23,0],Friday:[15,16,17,18,19,20,21,22,23,0],Saturday:[15,16,17,18,19,20,21,22,23,0],Sunday:[15,16,17,18,19,20,21,22,23,0]},notes:'',exceptions:[]},
+    ESTIF:{timezone:'UTC+3',availability:{Monday:[15,16,17,18,19,20,21],Tuesday:[15,16,17,18,19,20,21],Wednesday:[15,16,17,18,19,20,21],Thursday:[15,16,17,18,19,20,21],Friday:[15,16,17,18,19,20,21],Saturday:[15,16,17,18,19,20,21],Sunday:[15,16,17,18,19,20,21]},notes:'',exceptions:[]},
+    DINO:{timezone:'UTC-6',availability:{Monday:[15,16,17,18,0,1,2],Tuesday:[15,16,17,18,0,1,2],Wednesday:[15,16,17,18,0,1,2],Thursday:[15,16,17,18,0,1,2],Friday:[15,16,17,18,0,1,2],Saturday:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],Sunday:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},notes:'Free on weekends',exceptions:[]},
+    MAK:{timezone:'UTC-5',availability:{Monday:[17,18,19],Tuesday:[17,18,19,23,0,1,2],Wednesday:[17,18,19],Thursday:[17,18,19,23,0,1,2],Friday:[17,18,19,23,0,1,2],Saturday:[14,15,16,17,18,19,20,21,22,23,0,1,2,3],Sunday:[17,18,19,20,21,22,23]},notes:'',exceptions:[]},
+    HAWAII:{timezone:'UTC-10',availability:{Monday:[16,17,18,19,20,21,22,23],Tuesday:[16,17,18,19,20,21,22,23],Wednesday:[16,17,18,19,20,21,22,23],Thursday:[16,17,18,19,20,21,22,23],Friday:[16,17,18,19,20,21,22,23],Saturday:[16,17,18,19,20,21,22,23],Sunday:[16,17,18,19,20,21,22,23]},notes:'Some days after 16:00',exceptions:[]},
+    KAK:{timezone:'UTC-8',availability:{Monday:[],Tuesday:[],Wednesday:[],Thursday:[],Friday:[],Saturday:[],Sunday:[]},notes:'SEVENELEVEN',exceptions:[]},
+    DIPIE:{timezone:'UTC-5',availability:{Monday:[21,22,23],Tuesday:[21,22,23],Wednesday:[21,22,23],Thursday:[21,22,23],Friday:[21,22,23],Saturday:[21,22,23],Sunday:[21,22,23]},notes:'After 21:00, weekends vary but open',exceptions:[]},
+    GFFFFT:{timezone:'UTC+3',availability:{Monday:[15,16,17,18,19,20,21],Tuesday:[15,16,17,18,19,20,21],Wednesday:[15,16,17,18,19,20,21],Thursday:[15,16,17,18,19,20,21],Friday:[],Saturday:[15,16,17,18,19,20,21],Sunday:[15,16,17,18,19,20,21]},notes:'Fridays unavailable',exceptions:[]},
+    SNIPER:{timezone:'UTC+1',availability:{Monday:[14,15,16,17,18,19,20,21,22,23],Tuesday:[14,15,16,17,18,19,20,21,22,23],Wednesday:[14,15,16,17,18,19,20,21,22,23],Thursday:[14,15,16,17,18,19,20,21,22,23],Friday:[14,15,16,17,18,19,20,21,22,23],Saturday:[14,15,16,17,18,19,20,21,22,23],Sunday:[14,15,16,17,18,19,20,21,22,23]},notes:'Filler',exceptions:[]},
+    WARBEL:{timezone:'UTC-5',availability:{Monday:[16],Tuesday:[16],Wednesday:[16],Thursday:[16],Friday:[16],Saturday:[16],Sunday:[16]},notes:'Around 16:00',exceptions:[]},
+    'Darth Yoda':{timezone:'UTC-5',availability:{Monday:[23,0,1,2,3],Tuesday:[23,0,1,2,3],Wednesday:[23,0,1,2,3],Thursday:[23,0,1,2,3],Friday:[23,0,1,2,3],Saturday:[17,18,19,20,21,22,23,0,1,2,3,4,5],Sunday:[17,18,19,20,21,22,23,0,1,2,3,4,5]},notes:'Late nights on weekdays',exceptions:[]},
+    Dakota:{timezone:'UTC-6',availability:{Monday:[],Tuesday:[],Wednesday:[],Thursday:[],Friday:[],Saturday:[],Sunday:[]},notes:'Not specified',exceptions:[]}
+};
+
+function log(msg, cls='info') {
+    const el = document.getElementById('log');
+    el.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+}
+
+async function runSeed() {
+    const btn = document.getElementById('btn');
+    btn.disabled = true;
+    document.getElementById('log').innerHTML = '';
+    const players = Object.keys(initialTeamData);
+    log(`Starting seed — ${players.length} players...\n`);
+
+    let ok = 0, fail = 0;
+    for (const name of players) {
+        try {
+            const res = await fetch('/api/save-player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, playerData: initialTeamData[name] })
+            });
+            if (res.ok) {
+                log(`✅ ${name}`, 'ok');
+                ok++;
+            } else {
+                const txt = await res.text();
+                log(`❌ ${name}: ${txt}`, 'err');
+                fail++;
+            }
+        } catch(e) {
+            log(`❌ ${name}: ${e.message}`, 'err');
+            fail++;
+        }
+    }
+
+    log(`\n— Done: ${ok} saved, ${fail} failed —`);
+    if (fail === 0) {
+        log('\n✅ All players uploaded. You can delete seed.html from GitHub now.', 'ok');
+    }
+    btn.disabled = false;
+}
+</script>
+
+</body>
+</html>
