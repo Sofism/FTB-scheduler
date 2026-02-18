@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixThatBase - Team Scheduler</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+```
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    /* ── LIGHT (original warm palette) ── */
+    :root {
+        --bg-page:      #f0ede8;
+        --bg-panel:     #ffffff;
+        --bg-input:     #faf9f7;
+        --bg-subtle:    #faf9f7;
+        --border:       #e0dbd4;
+        --border-sub:   #e8e4df;
+        --text-pri:     #1a1a1a;
+        --text-sec:     #999;
+        --text-faint:   #bbb;
+        --tab-hover:    #f5f2ee;
+        --tab-active:   #f0ede8;
+        --accent:       #ff006e;
+        --accent2:      #ff6b35;
+        --green:        #1a7f37;
+        --green-bg:     #dafbe1;
+        --orange:       #ffaa00;
+        --orange-bg:    rgba(255,170,0,.1);
+        --red:          #cc4444;
+        --red-bg:       rgba(204,68,68,.08);
+        --purple:       #9d4edd;
+        --purple-bg:    rgba(157,78,221,.08);
+        --tbl-bg:       #faf9f7;
+        --tbl-header:   #f0ede8;
+        --tbl-border:   #e8e4df;
+        /* Cell palette light: cool-blue → teal → green → yellow-green → amber → orange → pink */
+        --c0-bg:#f4f2ef; --c0-tx:#ccc;
+        --c1-bg:#e6eef8; --c1-tx:#5d7db5;
+        --c2-bg:#cceef2; --c2-tx:#2e8a96;
+        --c3-bg:#c8f0d2; --c3-tx:#1f8040;
+        --c4-bg:#eaf5b0; --c4-tx:#5a7800;
+        --c5-bg:#fff3b0; --c5-tx:#8a6000; --c5-ac:#f5a623;
+        --c6-bg:#ffe4b0; --c6-tx:#8a4400; --c6-ac:#ff7c1e;
+        --c7-bg:#ffd4e4; --c7-tx:#8a0038; --c7-ac:#ff006e;
+        --tag-bg:rgba(0,0,0,.04); --tag-bd:rgba(0,0,0,.08); --tag-c:#444;
+        --t5-bg:rgba(245,166,35,.12); --t5-bd:rgba(245,166,35,.3); --t5-c:#7a5000;
+        --t6-bg:rgba(255,124,30,.12); --t6-bd:rgba(255,124,30,.3); --t6-c:#7a3400;
+        --t7-bg:rgba(255,0,110,.1);   --t7-bd:rgba(255,0,110,.25); --t7-c:#cc0055;
+        --b5-bg:rgba(245,166,35,.15); --b5-c:#8a6000;
+        --b6-bg:rgba(255,124,30,.15); --b6-c:#8a4000;
+        --b7-bg:rgba(255,0,110,.12);  --b7-c:#cc0055;
+        --chip-bg:#fff; --chip-bd:#e0dbd4; --chip-c:#555;
+    }
+
+    /* ── DARK (GitHub dark bg + original vibrant cell palette) ── */
+    [data-theme="dark"] {
+        --bg-page:      #0d1117;
+        --bg-panel:     #161b22;
+        --bg-input:     #0d1117;
+        --bg-subtle:    #161b22;
+        --border:       #30363d;
+        --border-sub:   #21262d;
+        --text-pri:     #e6edf3;
+        --text-sec:     #8b949e;
+        --text-faint:   #484f58;
+        --tab-hover:    #1c2128;
+        --tab-active:   #161b22;
+        --accent:       #ff006e;
+        --accent2:      #ff6b35;
+        --green:        #3fb950;
+        --green-bg:     #0f2b12;
+        --orange:       #ffaa00;
+        --orange-bg:    rgba(255,170,0,.1);
+        --red:          #ff7b72;
+        --red-bg:       rgba(255,123,114,.1);
+        --purple:       #d2a8ff;
+        --purple-bg:    rgba(210,168,255,.08);
+        --tbl-bg:       #0d1117;
+        --tbl-header:   #161b22;
+        --tbl-border:   #21262d;
+        /* Cell palette dark: same vibrant hues, dark-adjusted */
+        --c0-bg:#161b22; --c0-tx:#484f58;
+        --c1-bg:#141e2e; --c1-tx:#6b9bd2;
+        --c2-bg:#0d2228; --c2-tx:#3abccc;
+        --c3-bg:#0d2216; --c3-tx:#3acc6a;
+        --c4-bg:#1e2a00; --c4-tx:#b8dd00;
+        --c5-bg:#2a2000; --c5-tx:#ffc940; --c5-ac:#f5a623;
+        --c6-bg:#2a1400; --c6-tx:#ff9a50; --c6-ac:#ff7c1e;
+        --c7-bg:#280816; --c7-tx:#ff5599; --c7-ac:#ff006e;
+        --tag-bg:rgba(255,255,255,.06); --tag-bd:rgba(255,255,255,.12); --tag-c:#a1a1aa;
+        --t5-bg:rgba(245,166,35,.12); --t5-bd:rgba(245,166,35,.3); --t5-c:#f5a623;
+        --t6-bg:rgba(255,124,30,.12); --t6-bd:rgba(255,124,30,.3); --t6-c:#ff9a50;
+        --t7-bg:rgba(255,0,110,.12);  --t7-bd:rgba(255,0,110,.3);  --t7-c:#ff5599;
+        --b5-bg:rgba(245,166,35,.15); --b5-c:#f5a623;
+        --b6-bg:rgba(255,124,30,.15); --b6-c:#ff9a50;
+        --b7-bg:rgba(255,0,110,.15);  --b7-c:#ff5599;
+        --chip-bg:#21262d; --chip-bd:#30363d; --chip-c:#8b949e;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        font-size: 14px; line-height: 1.5;
+        background: var(--bg-page); color: var(--text-pri);
+        min-height: 100vh; padding: 12px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* HEADER */
+    .header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; padding:12px 16px; background:var(--bg-panel); border:1px solid var(--border); border-radius:6px; }
+    .header-left { display:flex; align-items:center; gap:10px; min-width:0; }
+    .header-logo { width:42px; height:42px; object-fit:contain; flex-shrink:0; }
+    .header-text h1 { font-family:'Barlow Condensed',sans-serif; font-size:clamp(1.3em,4vw,2em); font-weight:900; letter-spacing:3px; text-transform:uppercase; color:var(--text-pri); line-height:1; }
+    .header-text p { font-size:.72em; color:var(--text-sec); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+
+    /* THEME TOGGLE */
+    .theme-toggle { background:transparent; border:1px solid var(--border); border-radius:6px; width:32px; height:32px; font-size:.9em; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text-sec); flex-shrink:0; transition:border-color .15s; }
+    .theme-toggle:hover { border-color:var(--accent); }
+
+    /* TABS */
+    .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:14px; background:transparent; overflow-x:auto; }
+    .tab { flex-shrink:0; padding:8px 16px; background:transparent; border:none; color:var(--text-sec); font-family:'Barlow Condensed',sans-serif; font-size:clamp(.8em,2.5vw,1em); font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:color .15s; position:relative; white-space:nowrap; }
+    .tab:hover { color:var(--text-pri); }
+    .tab.active { color:var(--text-pri); }
+    .tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px 2px 0 0; }
+
+    /* PANELS */
+    .tab-content { display:none; background:var(--bg-panel); border-radius:6px; padding:16px; border:1px solid var(--border); }
+    .tab-content.active { display:block; animation:fadeIn .15s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes slideUp { from{transform:translateY(8px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    /* INPUTS */
+    select, input[type="text"], input[type="date"] { padding:5px 10px; border:1px solid var(--border); border-radius:6px; font-size:.84em; background:var(--bg-input); color:var(--text-pri); font-family:inherit; width:100%; transition:border-color .15s, box-shadow .15s; line-height:20px; }
+    select:focus, input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,0,110,.12); }
+    select[multiple] { height:auto; min-height:60px; max-height:80px; }
+
+    /* BUTTONS */
+    .btn { display:inline-flex; align-items:center; gap:5px; padding:5px 14px; font-family:'Barlow Condensed',sans-serif; font-size:.9em; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border-radius:6px; border:1px solid var(--border); background:var(--bg-subtle); color:var(--text-pri); cursor:pointer; white-space:nowrap; transition:background .15s, border-color .15s; line-height:20px; }
+    .btn:hover { background:var(--tab-hover); }
+    .btn-primary { background:var(--accent); color:#fff; border-color:transparent; }
+    .btn-primary:hover { opacity:.88; }
+    .btn-purple { background:var(--purple); color:#fff; border-color:transparent; }
+    .btn-purple:hover { opacity:.88; }
+    .btn-secondary { background:transparent; color:var(--text-sec); border:1px solid var(--border); }
+    .btn-secondary:hover { background:var(--tab-hover); color:var(--text-pri); }
+    .btn-danger { background:transparent; color:var(--red); border:1px solid var(--border); }
+    .btn-danger:hover { background:var(--red-bg); border-color:var(--red); }
+
+    /* CONTROLS */
+    .controls { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-bottom:14px; align-items:end; }
+    .control-group { display:flex; flex-direction:column; gap:4px; }
+    .control-group label { font-family:'Barlow Condensed',sans-serif; font-size:.7em; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-sec); }
+
+    /* TABLE */
+    .grid-container { overflow-x:auto; border:1px solid var(--border); border-radius:6px; margin-top:12px; -webkit-overflow-scrolling:touch; }
+    table { width:100%; border-collapse:collapse; font-size:.79em; background:var(--tbl-bg); }
+    th, td { padding:6px 6px; text-align:center; border:1px solid var(--tbl-border); min-width:96px; }
+    th { background:var(--tbl-header); color:var(--text-pri); font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:.8em; letter-spacing:1px; text-transform:uppercase; position:sticky; top:0; z-index:10; border-bottom:2px solid var(--accent); line-height:1.3; }
+    th .th-day { display:block; }
+    th .th-date { display:block; font-size:.8em; font-weight:600; color:var(--text-sec); margin-top:1px; }
+    th.col-today { border-bottom-color:var(--accent2); }
+    th.col-today .th-date { color:var(--accent2); }
+    th.col-has-exception .th-date { color:var(--orange); }
+    th:first-child { position:sticky; left:0; z-index:11; }
+    td:first-child { background:var(--tbl-header); position:sticky; left:0; z-index:5; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:.82em; color:var(--text-sec); border-right:1px solid var(--border); }
+    .availability-cell { vertical-align:top; padding:4px 3px; transition:opacity .1s; }
+    .availability-cell:hover { opacity:.82; }
+
+    /* CELLS */
+    .av-0  { background:var(--c0-bg); color:var(--c0-tx); }
+    .av-1  { background:var(--c1-bg); color:var(--c1-tx); }
+    .av-2  { background:var(--c2-bg); color:var(--c2-tx); }
+    .av-3  { background:var(--c3-bg); color:var(--c3-tx); }
+    .av-4  { background:var(--c4-bg); color:var(--c4-tx); }
+    .av-5  { background:var(--c5-bg); color:var(--c5-tx); border-left:3px solid var(--c5-ac) !important; font-weight:600; }
+    .av-6  { background:var(--c6-bg); color:var(--c6-tx); border-left:3px solid var(--c6-ac) !important; font-weight:600; }
+    .av-7p { background:var(--c7-bg); color:var(--c7-tx); border-left:3px solid var(--c7-ac) !important; font-weight:700; }
+    .av-5 .player-tag  { background:var(--t5-bg); border-color:var(--t5-bd); color:var(--t5-c); }
+    .av-6 .player-tag  { background:var(--t6-bg); border-color:var(--t6-bd); color:var(--t6-c); }
+    .av-7p .player-tag { background:var(--t7-bg); border-color:var(--t7-bd); color:var(--t7-c); }
+    .player-names { display:flex; flex-direction:column; gap:2px; font-size:.78em; }
+    .player-tag { padding:2px 4px; border-radius:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:var(--tag-bg); border:1px solid var(--tag-bd); color:var(--tag-c); }
+
+    /* EXCEPTION BADGE */
+    .exc-badge { display:inline-block; margin-top:3px; padding:1px 7px; background:rgba(255,170,0,.15); border:1px solid rgba(255,170,0,.4); border-radius:20px; color:#b87800; font-size:.68em; font-weight:700; font-family:'Barlow Condensed',sans-serif; letter-spacing:.5px; text-transform:uppercase; }
+    [data-theme="dark"] .exc-badge { color:var(--orange); border-color:rgba(255,170,0,.35); }
+
+    /* BEST WINDOWS */
+    .best-windows-header { display:flex; align-items:center; gap:10px; margin-bottom:9px; flex-wrap:wrap; }
+    .best-windows-header h3 { font-family:'Barlow Condensed',sans-serif; font-size:.76em; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-sec); }
+    .windows-list { display:flex; flex-direction:column; gap:4px; margin-bottom:14px; }
+    .window-row { display:flex; align-items:center; flex-wrap:wrap; background:var(--bg-panel); border:1px solid var(--border); border-radius:6px; overflow:hidden; cursor:pointer; transition:border-color .15s; }
+    .window-row:hover { border-color:var(--accent); }
+    .window-day { font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:.73em; letter-spacing:1px; text-transform:uppercase; color:var(--text-sec); padding:8px 12px; min-width:78px; border-right:1px solid var(--border-sub); }
+    .window-time { font-family:'JetBrains Mono',monospace; font-size:.84em; font-weight:600; color:var(--text-pri); padding:8px 14px; flex:1; }
+    .window-badge { font-family:'Barlow Condensed',sans-serif; font-size:.73em; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:2px 10px; border-radius:20px; margin-right:8px; white-space:nowrap; }
+    .badge-5 { background:var(--b5-bg); color:var(--b5-c); border:1px solid rgba(245,166,35,.25); }
+    .badge-6 { background:var(--b6-bg); color:var(--b6-c); border:1px solid rgba(255,124,30,.25); }
+    .badge-7 { background:var(--b7-bg); color:var(--b7-c); border:1px solid rgba(255,0,110,.25); }
+    .window-players-toggle { font-size:.7em; color:var(--text-faint); padding:8px 11px; border-left:1px solid var(--border-sub); white-space:nowrap; }
+    .window-players-list { display:none; width:100%; padding:6px 11px 8px 90px; background:var(--tab-hover); border-top:1px solid var(--border-sub); gap:5px; flex-wrap:wrap; font-size:.77em; }
+    .window-players-list.open { display:flex; }
+    .player-chip { background:var(--chip-bg); border:1px solid var(--chip-bd); border-radius:20px; padding:1px 8px; font-family:'Barlow Condensed',sans-serif; font-weight:600; letter-spacing:1px; text-transform:uppercase; font-size:.84em; color:var(--chip-c); }
+
+    /* LEGEND */
+    .legend { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; padding:8px 12px; background:var(--bg-subtle); border-radius:6px; border:1px solid var(--border); }
+    .legend-item { display:flex; align-items:center; gap:5px; color:var(--text-sec); font-size:.7em; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; }
+    .legend-color { width:18px; height:13px; border-radius:3px; flex-shrink:0; }
+
+    /* SAVE BAR */
+    .save-bar { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; padding:9px 13px; background:var(--bg-subtle); border:1px solid var(--border-sub); border-left:2px solid var(--accent); border-radius:6px; }
+    .save-bar span { font-size:.78em; color:var(--text-sec); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; }
+
+    /* FORM */
+    .form-section { margin-bottom:18px; }
+    .form-section h3 { font-family:'Barlow Condensed',sans-serif; font-size:.72em; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-sec); margin-bottom:9px; padding-bottom:6px; border-bottom:1px solid var(--border-sub); }
+    .day-section { margin-bottom:10px; padding:12px; background:var(--bg-subtle); border-radius:6px; border:1px solid var(--border-sub); border-left:2px solid var(--accent2); }
+    .day-section h4 { font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:.84em; color:var(--accent2); margin-bottom:8px; }
+    .time-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(70px,1fr)); gap:3px; }
+    .time-slot { display:flex; align-items:center; gap:4px; padding:4px 6px; background:var(--bg-panel); border-radius:4px; border:1px solid var(--border); cursor:pointer; transition:border-color .12s; }
+    .time-slot:hover { border-color:var(--accent); }
+    .time-slot input[type="checkbox"] { width:12px; height:12px; cursor:pointer; accent-color:var(--accent); flex-shrink:0; }
+    .time-slot label { cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:.72em; color:var(--text-sec); }
+    .quick-actions { display:flex; gap:5px; margin-bottom:9px; flex-wrap:wrap; }
+    .quick-btn { padding:3px 10px; background:transparent; border:1px solid var(--border); color:var(--text-sec); border-radius:6px; font-family:'Barlow Condensed',sans-serif; font-size:.73em; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all .12s; }
+    .quick-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* EXCEPTIONS */
+    .exceptions-section { margin-top:14px; padding:13px; background:var(--bg-subtle); border-radius:6px; border:1px solid var(--border-sub); border-left:2px solid var(--purple); }
+    .exceptions-section h4 { font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:.84em; color:var(--purple); margin-bottom:8px; }
+    .exception-item { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; padding:10px 12px; background:var(--bg-panel); border-radius:6px; border:1px solid var(--border-sub); border-left:2px solid var(--purple); }
+    .exc-row1 { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .exc-row2 { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .exc-time-group { display:flex; align-items:center; gap:5px; }
+    .exc-time-label { font-family:'Barlow Condensed',sans-serif; font-size:.7em; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-sec); white-space:nowrap; }
+    .exc-time-group select { width:auto; padding:4px 8px; font-size:.82em; }
+    .btn-remove { padding:4px 10px; background:transparent; color:var(--red); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:.78em; transition:all .12s; white-space:nowrap; }
+    .btn-remove:hover { background:var(--red-bg); border-color:var(--red); }
+    .btn-add-exception { margin-top:6px; padding:4px 12px; background:transparent; color:var(--purple); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-family:'Barlow Condensed',sans-serif; font-size:.78em; font-weight:700; letter-spacing:1px; text-transform:uppercase; transition:all .12s; }
+    .btn-add-exception:hover { background:var(--purple-bg); border-color:var(--purple); }
+
+    /* ROSTER */
+    .player-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:8px; margin-top:12px; }
+    .player-card { background:var(--bg-subtle); padding:12px 14px; border-radius:6px; border:1px solid var(--border-sub); border-left:2px solid var(--accent); cursor:pointer; transition:border-color .15s, background .15s; }
+    .player-card:hover { background:var(--tab-hover); border-color:var(--border); }
+    .player-card h4 { font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:.95em; color:var(--text-pri); margin-bottom:5px; }
+    .player-card p { font-size:.78em; color:var(--text-sec); margin:2px 0; }
+    .exc-summary { display:inline-block; margin-top:6px; padding:2px 8px; background:var(--orange-bg); border:1px solid rgba(255,170,0,.3); border-radius:20px; font-size:.7em; color:#b87800; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; }
+    [data-theme="dark"] .exc-summary { color:var(--orange); }
+    .player-card-actions { display:flex; justify-content:flex-end; margin-top:8px; }
+
+    /* MODAL */
+    .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,.65); padding:12px; }
+    .modal.active { display:flex; align-items:center; justify-content:center; }
+    .modal-content { background:var(--bg-panel); border-radius:8px; padding:20px; max-width:680px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); border-top:3px solid var(--accent); animation:slideUp .2s ease; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-sub); }
+    .modal-header h2 { font-family:'Barlow Condensed',sans-serif; font-weight:900; letter-spacing:3px; text-transform:uppercase; font-size:1.5em; color:var(--text-pri); }
+    .close-modal { background:transparent; border:1px solid var(--border); font-size:.9em; color:var(--text-sec); cursor:pointer; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; transition:all .12s; flex-shrink:0; }
+    .close-modal:hover { border-color:var(--accent); color:var(--accent); }
+    .modal-section { margin-bottom:16px; }
+    .modal-section h3 { font-family:'Barlow Condensed',sans-serif; font-size:.72em; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-faint); margin-bottom:8px; }
+    .info-grid { display:grid; gap:4px; }
+    .info-item { display:flex; justify-content:space-between; padding:7px 10px; background:var(--bg-subtle); border-radius:6px; border:1px solid var(--border-sub); gap:10px; }
+    .info-label { font-weight:600; color:var(--text-sec); font-size:.82em; flex-shrink:0; }
+    .info-value { color:var(--text-pri); font-size:.82em; text-align:right; }
+    .schedule-grid { display:grid; gap:5px; }
+    .day-schedule { background:var(--bg-subtle); padding:8px 10px; border-radius:6px; border-left:2px solid var(--accent2); border:1px solid var(--border-sub); border-left:2px solid var(--accent2); }
+    .day-schedule h4 { font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:.76em; color:var(--accent2); margin-bottom:3px; }
+    .hours-display { color:var(--text-sec); font-size:.82em; font-family:'JetBrains Mono',monospace; line-height:1.5; }
+    .no-availability { color:var(--text-faint); font-style:italic; font-family:inherit; }
+    .exc-modal-item { display:flex; justify-content:space-between; padding:7px 10px; background:var(--bg-subtle); border-radius:6px; border:1px solid var(--border-sub); border-left:2px solid var(--orange); gap:10px; margin-bottom:4px; }
+    .exc-modal-item:last-child { margin-bottom:0; }
+
+    /* ADD PLAYER MODAL */
+    .add-player-modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,.65); padding:12px; }
+    .add-player-modal.active { display:flex; align-items:center; justify-content:center; }
+    .add-player-form { background:var(--bg-panel); border-radius:8px; padding:20px; max-width:360px; width:100%; border:1px solid var(--border); border-top:3px solid var(--purple); animation:slideUp .2s ease; }
+    .add-player-form h3 { font-family:'Barlow Condensed',sans-serif; font-weight:900; letter-spacing:3px; text-transform:uppercase; font-size:1.2em; color:var(--text-pri); margin-bottom:14px; }
+    .add-player-form .field { margin-bottom:10px; display:flex; flex-direction:column; gap:5px; }
+    .add-player-form .field label { font-family:'Barlow Condensed',sans-serif; font-size:.72em; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-sec); }
+    .add-player-form .actions { display:flex; gap:8px; margin-top:14px; justify-content:flex-end; }
+
+    @media(max-width:600px) {
+        body { padding:8px; }
+        .tab-content { padding:12px; }
+        .controls { grid-template-columns:1fr 1fr; }
+    }
+```
+
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-left">
+            <img src="fixthatbase-logo.jpeg" alt="FTB" class="header-logo">
+            <div class="header-text">
+                <h1>Fix That Base</h1>
+                <p>Team Availability Scheduler</p>
+            </div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><span id="themeIcon">🌙</span></button>
+    </div>
+
+```
+<div class="tabs">
+    <button class="tab active" onclick="switchTab('overview',event)">📊 Overview</button>
+    <button class="tab" onclick="switchTab('update',event)">✏️ Update Schedule</button>
+    <button class="tab" onclick="switchTab('players',event)">👥 Roster</button>
+</div>
+
+<!-- TAB 1 -->
+<div id="overview" class="tab-content active">
+    <div class="controls">
+        <div class="control-group">
+            <label>Timezone</label>
+            <select id="userTimezone" onchange="updateView()">
+                <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
+                <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
+                <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
+                <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
+                <option value="UTC+5:30">UTC+5:30 (India)</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Players</label>
+            <select id="playerFilter" onchange="updateView()" multiple></select>
+        </div>
+        <div class="control-group">
+            <label>Days</label>
+            <select id="dayFilter" onchange="updateView()" multiple>
+                <option value="Monday" selected>Monday</option><option value="Tuesday" selected>Tuesday</option>
+                <option value="Wednesday" selected>Wednesday</option><option value="Thursday" selected>Thursday</option>
+                <option value="Friday" selected>Friday</option><option value="Saturday" selected>Saturday</option>
+                <option value="Sunday" selected>Sunday</option>
+            </select>
+        </div>
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+    </div>
+    <div id="bestTimes"></div>
+    <div class="grid-container">
+        <table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table>
+    </div>
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:var(--c0-bg);border:1px solid var(--border-subtle)"></div><span>0</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(90deg,var(--c1-bg),var(--c2-bg))"></div><span>1–2</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:linear-gradient(90deg,var(--c3-bg),var(--c4-bg))"></div><span>3–4</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--c5-bg);border-left:3px solid var(--c5-ac)"></div><span>5 — Match ready</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--c6-bg);border-left:3px solid var(--c6-ac)"></div><span>6 — Optimal</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:var(--c7-bg);border-left:3px solid var(--c7-ac)"></div><span>7+ — Legendary</span></div>
+    </div>
+</div>
+
+<!-- TAB 2 -->
+<div id="update" class="tab-content">
+    <div class="save-bar">
+        <span id="saveBarLabel">Select your name to start editing</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn-danger" onclick="deleteCurrentPlayer()">🗑 Remove Player</button>
+            <button class="btn btn-primary" onclick="saveAvailability()">💾 Save Schedule</button>
+        </div>
+    </div>
+    <div class="form-section">
+        <h3>Player Information</h3>
+        <div class="controls">
+            <div class="control-group">
+                <label>Your name</label>
+                <select id="updatePlayerSelect" onchange="loadPlayerData()"><option value="">Select your name</option></select>
+            </div>
+            <div class="control-group">
+                <label>Your timezone</label>
+                <select id="updateTimezone">
+                    <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
+                    <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
+                    <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
+                    <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
+                    <option value="UTC+5:30">UTC+5:30 (India)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="exceptions-section">
+        <h4>⚡ Special Dates / Exceptions</h4>
+        <p style="color:var(--text-muted);font-size:.82em;margin-bottom:9px;">Override your regular schedule for a specific date.</p>
+        <div id="exceptionsContainer"></div>
+        <button class="btn-add-exception" onclick="addExceptionRow()">+ Add Exception Date</button>
+    </div>
+    <div class="quick-actions" style="margin-top:16px;">
+        <button class="quick-btn" onclick="selectAllTimes()">Select All</button>
+        <button class="quick-btn" onclick="clearAllTimes()">Clear All</button>
+        <button class="quick-btn" onclick="copyDay()">Copy Mon → All</button>
+    </div>
+    <div id="daysContainer"></div>
+    <div class="form-section">
+        <h3>Additional Notes</h3>
+        <input type="text" id="playerNotes" placeholder="E.g., Available after 9pm, weekends vary…" style="width:100%">
+    </div>
+    <button class="btn btn-primary" onclick="saveAvailability()">💾 Save Schedule</button>
+</div>
+
+<!-- TAB 3 -->
+<div id="players" class="tab-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <h3 style="color:var(--text-primary);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;">Team Members</h3>
+        <button class="btn btn-purple" onclick="openAddPlayer()">+ Add Player</button>
+    </div>
+    <div class="player-list" id="playersList"></div>
+</div>
+```
+
+</div>
+
+<!-- Add Player Modal -->
+
+<div class="add-player-modal" id="addPlayerModal">
+    <div class="add-player-form">
+        <h3>➕ Add Player</h3>
+        <div class="field"><label>Name</label><input type="text" id="newPlayerName" placeholder="e.g. ROCKSTAR"></div>
+        <div class="field"><label>Timezone</label>
+            <select id="newPlayerTimezone">
+                <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
+                <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
+                <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
+                <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
+                <option value="UTC+5:30">UTC+5:30 (India)</option>
+            </select>
+        </div>
+        <div class="field"><label>Notes (optional)</label><input type="text" id="newPlayerNotes" placeholder="e.g. Weekends only"></div>
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="closeAddPlayer()">Cancel</button>
+            <button class="btn btn-purple" onclick="confirmAddPlayer()">Add Player</button>
+        </div>
+    </div>
+</div>
+
+<div id="playerModal" class="modal">
+    <div class="modal-content" id="modalPlayerContent"></div>
+</div>
+
+</div>
+
+<script>
+const initialTeamData = {
+    TOM:{timezone:'UTC',availability:{Monday:[13,14,15,16,17,18,19,20,21],Tuesday:[13,14,15,16,17,18,19,20,21],Wednesday:[13,14,15,16,17,18,19,20,21],Thursday:[13,14,15,16,17,18,19,20,21],Friday:[13,14,15,16,17,18,19,20,21],Saturday:[],Sunday:[]},notes:'Weekends sketchy',exceptions:[]},
+    KIYO:{timezone:'UTC+5:30',availability:{Monday:[15,16,17,18,19,20,21,22,23,0],Tuesday:[15,16,17,18,19,20,21,22,23,0],Wednesday:[15,16,17,18,19,20,21,22,23,0],Thursday:[15,16,17,18,19,20,21,22,23,0],Friday:[15,16,17,18,19,20,21,22,23,0],Saturday:[15,16,17,18,19,20,21,22,23,0],Sunday:[15,16,17,18,19,20,21,22,23,0]},notes:'',exceptions:[]},
+    ESTIF:{timezone:'UTC+3',availability:{Monday:[15,16,17,18,19,20,21],Tuesday:[15,16,17,18,19,20,21],Wednesday:[15,16,17,18,19,20,21],Thursday:[15,16,17,18,19,20,21],Friday:[15,16,17,18,19,20,21],Saturday:[15,16,17,18,19,20,21],Sunday:[15,16,17,18,19,20,21]},notes:'',exceptions:[]},
+    DINO:{timezone:'UTC-6',availability:{Monday:[15,16,17,18,0,1,2],Tuesday:[15,16,17,18,0,1,2],Wednesday:[15,16,17,18,0,1,2],Thursday:[15,16,17,18,0,1,2],Friday:[15,16,17,18,0,1,2],Saturday:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],Sunday:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},notes:'Free on weekends',exceptions:[]},
+    MAK:{timezone:'UTC-5',availability:{Monday:[17,18,19],Tuesday:[17,18,19,23,0,1,2],Wednesday:[17,18,19],Thursday:[17,18,19,23,0,1,2],Friday:[17,18,19,23,0,1,2],Saturday:[14,15,16,17,18,19,20,21,22,23,0,1,2,3],Sunday:[17,18,19,20,21,22,23]},notes:'',exceptions:[]},
+    HAWAII:{timezone:'UTC-10',availability:{Monday:[16,17,18,19,20,21,22,23],Tuesday:[16,17,18,19,20,21,22,23],Wednesday:[16,17,18,19,20,21,22,23],Thursday:[16,17,18,19,20,21,22,23],Friday:[16,17,18,19,20,21,22,23],Saturday:[16,17,18,19,20,21,22,23],Sunday:[16,17,18,19,20,21,22,23]},notes:'Some days after 16:00',exceptions:[]},
+    KAK:{timezone:'UTC-8',availability:{Monday:[],Tuesday:[],Wednesday:[],Thursday:[],Friday:[],Saturday:[],Sunday:[]},notes:'SEVENELEVEN',exceptions:[]},
+    DIPIE:{timezone:'UTC-5',availability:{Monday:[21,22,23],Tuesday:[21,22,23],Wednesday:[21,22,23],Thursday:[21,22,23],Friday:[21,22,23],Saturday:[21,22,23],Sunday:[21,22,23]},notes:'After 21:00, weekends vary but open',exceptions:[]},
+    GFFFFT:{timezone:'UTC+3',availability:{Monday:[15,16,17,18,19,20,21],Tuesday:[15,16,17,18,19,20,21],Wednesday:[15,16,17,18,19,20,21],Thursday:[15,16,17,18,19,20,21],Friday:[],Saturday:[15,16,17,18,19,20,21],Sunday:[15,16,17,18,19,20,21]},notes:'Fridays unavailable',exceptions:[]},
+    SNIPER:{timezone:'UTC+1',availability:{Monday:[14,15,16,17,18,19,20,21,22,23],Tuesday:[14,15,16,17,18,19,20,21,22,23],Wednesday:[14,15,16,17,18,19,20,21,22,23],Thursday:[14,15,16,17,18,19,20,21,22,23],Friday:[14,15,16,17,18,19,20,21,22,23],Saturday:[14,15,16,17,18,19,20,21,22,23],Sunday:[14,15,16,17,18,19,20,21,22,23]},notes:'Filler',exceptions:[]},
+    WARBEL:{timezone:'UTC-5',availability:{Monday:[16],Tuesday:[16],Wednesday:[16],Thursday:[16],Friday:[16],Saturday:[16],Sunday:[16]},notes:'Around 16:00',exceptions:[]},
+    'Darth Yoda':{timezone:'UTC-5',availability:{Monday:[23,0,1,2,3],Tuesday:[23,0,1,2,3],Wednesday:[23,0,1,2,3],Thursday:[23,0,1,2,3],Friday:[23,0,1,2,3],Saturday:[17,18,19,20,21,22,23,0,1,2,3,4,5],Sunday:[17,18,19,20,21,22,23,0,1,2,3,4,5]},notes:'Late nights on weekdays',exceptions:[]},
+    Dakota:{timezone:'UTC-6',availability:{Monday:[],Tuesday:[],Wednesday:[],Thursday:[],Friday:[],Saturday:[],Sunday:[]},notes:'Not specified',exceptions:[]}
+};
+
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let teamData={};
+
+async function initializeData(){
+    try{
+        const s=localStorage.getItem('fixthatbase-team-data-v2');
+        if(s){
+            teamData=JSON.parse(s);
+            // Ensure every player has an exceptions array (missing in older saved data)
+            Object.keys(teamData).forEach(p=>{ if(!teamData[p].exceptions) teamData[p].exceptions=[]; });
+        } else {
+            teamData=JSON.parse(JSON.stringify(initialTeamData));
+        }
+    } catch(e){ teamData=JSON.parse(JSON.stringify(initialTeamData)); }
+    populatePlayerSelects(); generateDayForms(); updateView(); updatePlayersList();
+}
+async function saveData(){ try{ localStorage.setItem('fixthatbase-team-data-v2',JSON.stringify(teamData)); return true; }catch(e){ return false; } }
+
+function populatePlayerSelects(){
+    const names=Object.keys(teamData).sort();
+    document.getElementById('playerFilter').innerHTML=names.map(n=>`<option value="${n}" selected>${n}</option>`).join('');
+    document.getElementById('updatePlayerSelect').innerHTML='<option value="">Select your name</option>'+names.map(n=>`<option value="${n}">${n}</option>`).join('');
+}
+
+function parseTimezone(tz){ if(tz==='UTC')return 0; const m=tz.match(/UTC([+-])(\d+)(?::(\d+))?/); if(!m)return 0; return(m[1]==='+'?1:-1)*(parseInt(m[2])+(m[3]?parseInt(m[3]):0)/60); }
+function convertTime(h,f,t){ let r=h+parseTimezone(t)-parseTimezone(f); while(r<0)r+=24; while(r>=24)r-=24; return Math.round(r); }
+
+// Dates auto-update every render — no hardcoded values
+function buildDayDateMap(){
+    const today=new Date(), map={};
+    for(let i=0;i<14;i++){
+        const d=new Date(today); d.setDate(today.getDate()+i);
+        const name=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+        // Use local date (not UTC) to match the date picker value
+        const yr=d.getFullYear(), mo=String(d.getMonth()+1).padStart(2,'0'), dy=String(d.getDate()).padStart(2,'0');
+        const s=`${yr}-${mo}-${dy}`;
+        if(!map[name]) map[name]=s;
+    }
+    return map;
+}
+
+function cellClass(n){ return n===0?'av-0':n===1?'av-1':n===2?'av-2':n===3?'av-3':n===4?'av-4':n===5?'av-5':n===6?'av-6':'av-7p'; }
+
+function updateView(){
+    const userTZ=document.getElementById('userTimezone').value;
+    const selP=Array.from(document.getElementById('playerFilter').selectedOptions).map(o=>o.value);
+    const selD=Array.from(document.getElementById('dayFilter').selectedOptions).map(o=>o.value);
+    const ddm=buildDayDateMap();
+
+    const av={}, colExc={};
+    selD.forEach(day=>{ av[day]={}; colExc[day]=false; for(let h=0;h<24;h++){av[day][h]=[];} });
+
+    selP.forEach(player=>{
+        const data=teamData[player]; if(!data?.availability) return;
+        const exceptions=data.exceptions||[];
+        selD.forEach(day=>{
+            const date=ddm[day];
+            const exc=exceptions.find(e=>e.date===date);
+            const reg=new Set(data.availability[day]||[]);
+            if(exc){
+                colExc[day]=true;
+                if(exc.status==='not-available'){
+                    // blocked whole day, no cell flag needed
+                } else if(exc.status==='partial-unavailable'){
+                    const m=(exc.notes||'').match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+                    if(m){
+                        const bs=parseInt(m[1]),be=parseInt(m[3]),bl=new Set();
+                        for(let h=bs;h!==be;h=(h+1)%24) bl.add(h);
+                        reg.forEach(h=>{ if(!bl.has(h)&&av[day][h]!==undefined) av[day][h].push(player); });
+                    }
+                } else if(exc.status==='available'){
+                    reg.forEach(h=>{ if(av[day][h]!==undefined) av[day][h].push(player); });
+                } else if(exc.status==='custom'){
+                    const m=(exc.notes||'').match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+                    if(m){
+                        const sh=parseInt(m[1]),eh=parseInt(m[3]),ch=new Set();
+                        for(let h=sh;h!==eh;h=(h+1)%24) ch.add(h);
+                        ch.forEach(h=>{ if(av[day][h]!==undefined){av[day][h].push(player);} });
+                    }
+                }
+            } else {
+                reg.forEach(h=>{ if(av[day][h]!==undefined) av[day][h].push(player); });
+            }
+        });
+    });
+
+    const todayStr=new Date().toISOString().split('T')[0];
+    let hHTML=`<tr><th>Time (${userTZ})</th>`;
+    selD.forEach(day=>{
+        const ds=ddm[day]||'', isToday=ds===todayStr;
+        const dl=ds?new Date(ds+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+        const cls=isToday?'col-today':colExc[day]?'col-has-exception':'';
+        const badge=colExc[day]?'<span class="exc-badge">⚡ exceptions</span>':'';
+        hHTML+=`<th class="${cls}"><span class="th-day">${day}</span><span class="th-date">${dl}</span>${badge}</th>`;
+    });
+    hHTML+='</tr>';
+    document.getElementById('tableHead').innerHTML=hHTML;
+
+    const tbody=document.getElementById('tableBody'); tbody.innerHTML='';
+    [13,14,15,16,17,18,19,20,21,22,23,0,1,2].forEach(h=>{
+        const dh=convertTime(h,'UTC',userTZ); const row=document.createElement('tr');
+        const tc=document.createElement('td'); tc.textContent=dh.toString().padStart(2,'0')+':00'; row.appendChild(tc);
+        selD.forEach(day=>{
+            const players=av[day][h]||[], count=players.length;
+            const cell=document.createElement('td');
+            cell.className='availability-cell '+cellClass(count);
+            if(count>0){ const d=document.createElement('div'); d.className='player-names'; players.forEach(p=>{ const t=document.createElement('div'); t.className='player-tag'; t.textContent=p; d.appendChild(t); }); cell.appendChild(d); }
+            else cell.textContent='-';
+            row.appendChild(cell);
+        });
+        tbody.appendChild(row);
+    });
+
+    updateBestTimes(av,userTZ,selD);
+}
+
+
+function updateBestTimes(av,userTZ,selD){
+    const raw=[];
+    selD.forEach(day=>{
+        let i=0;
+        while(i<24){
+            if((av[day][i]||[]).length>=5){
+                let j=i,peak=0,peakP=[];
+                while(j<24&&(av[day][j]||[]).length>=5){
+                    const cur=av[day][j]||[];
+                    if(cur.length>peak){peak=cur.length;peakP=[...cur];}
+                    j++;
+                }
+                raw.push({days:[day],startUTC:i,endUTC:j,peak,peakP:[...peakP].sort()});
+                i=j;
+            } else i++;
+        }
+    });
+    const grouped=[];
+    raw.forEach(w=>{
+        const key=`${w.startUTC}-${w.endUTC}-${w.peakP.join(',')}`;
+        const ex=grouped.find(g=>g.key===key);
+        if(ex) ex.days.push(w.days[0]); else grouped.push({key,...w});
+    });
+    grouped.sort((a,b)=>b.peak-a.peak||a.startUTC-b.startUTC);
+    const total=raw.length;
+    const sub=total===0?'':`${total} slot${total!==1?'s':''} · ${grouped.length} group${grouped.length!==1?'s':''} · click to expand`;
+    let html=`<div class="best-windows-header"><h3>▶ Best Windows To Play</h3><span style="font-size:.7em;color:var(--text-muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">${sub}</span></div>`;
+    if(grouped.length>0){
+        html+='<div class="windows-list">';
+        grouped.forEach((w,idx)=>{
+            const s=convertTime(w.startUTC,'UTC',userTZ).toString().padStart(2,'0')+':00';
+            const e=convertTime(w.endUTC,'UTC',userTZ).toString().padStart(2,'0')+':00';
+            const bc=w.peak>=7?'badge-7':w.peak===6?'badge-6':'badge-5';
+            const bl=`${w.peak} player${w.peak!==1?'s':''}${w.peak>=7?' ★':''}`;
+            const ds=w.days.length===7?'Every day':w.days.length>2?w.days.slice(0,2).map(d=>d.slice(0,3).toUpperCase()).join(' · ')+'…':w.days.map(d=>d.slice(0,3).toUpperCase()).join(' · ');
+            const chips=w.peakP.map(p=>`<span class="player-chip">${p}</span>`).join('');
+            html+=`<div><div class="window-row" onclick="toggleWP(${idx})"><span class="window-day">${ds}</span><span class="window-time">${s} – ${e} ${userTZ}</span><span class="window-badge ${bc}">${bl}</span><span class="window-players-toggle" id="tg-${idx}">▾ ${w.peakP.length}</span></div><div class="window-players-list" id="wp-${idx}">${chips}</div></div>`;
+        });
+        html+='</div>';
+    } else { html+=`<p style="color:var(--text-muted);font-size:.84em;padding:6px 0">No windows with 5+ players found.</p>`; }
+    document.getElementById('bestTimes').innerHTML=html;
+}
+function toggleWP(idx){ const l=document.getElementById('wp-'+idx),t=document.getElementById('tg-'+idx),o=l.classList.toggle('open'); t.textContent=o?'▴ hide':'▾ '+l.children.length; }
+
+function resetFilters(){ document.getElementById('userTimezone').value='UTC'; for(let o of document.getElementById('playerFilter').options)o.selected=true; for(let o of document.getElementById('dayFilter').options)o.selected=true; updateView(); }
+function switchTab(n,e){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); if(e?.target)e.target.classList.add('active'); document.getElementById(n).classList.add('active'); }
+
+function generateDayForms(){
+    let h='';
+    DAYS.forEach(day=>{ h+=`<div class="day-section"><h4>${day}</h4><div class="time-grid" id="day-${day}">`; for(let i=0;i<24;i++) h+=`<div class="time-slot"><input type="checkbox" id="${day}-${i}" value="${i}"><label for="${day}-${i}">${i.toString().padStart(2,'0')}:00</label></div>`; h+='</div></div>'; });
+    document.getElementById('daysContainer').innerHTML=h;
+}
+function loadPlayerData(){
+    const name=document.getElementById('updatePlayerSelect').value; if(!name||!teamData[name]) return;
+    const data=teamData[name];
+    document.getElementById('updateTimezone').value=data.timezone||'UTC';
+    document.getElementById('playerNotes').value=data.notes||'';
+    document.getElementById('saveBarLabel').textContent=`Editing: ${name}`;
+    DAYS.forEach(day=>{ for(let h=0;h<24;h++){ const cb=document.getElementById(`${day}-${h}`); if(cb) cb.checked=(data.availability?.[day]||[]).includes(h); } });
+    loadExceptions(data.exceptions||[]);
+}
+function selectAllTimes(){ DAYS.forEach(day=>{ for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=true;} }); }
+function clearAllTimes(){ DAYS.forEach(day=>{ for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=false;} }); }
+function copyDay(){ const mh=[]; for(let h=0;h<24;h++){const cb=document.getElementById(`Monday-${h}`);if(cb&&cb.checked)mh.push(h);} DAYS.slice(1).forEach(day=>{for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=mh.includes(h);}}); }
+
+async function saveAvailability(){
+    const name=document.getElementById('updatePlayerSelect').value; if(!name){alert('Please select your name');return;}
+    const av={};
+    DAYS.forEach(day=>{ av[day]=[]; for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb&&cb.checked)av[day].push(h);} });
+    teamData[name]={timezone:document.getElementById('updateTimezone').value,availability:av,notes:document.getElementById('playerNotes').value,exceptions:getExceptions()};
+    if(await saveData()!==false){updateView();updatePlayersList();alert('✅ Saved!');}
+    else alert('⚠️ Could not persist. Changes apply this session only.');
+}
+
+function updatePlayersList(){
+    document.getElementById('playersList').innerHTML=Object.keys(teamData).sort().map(name=>{
+        const data=teamData[name];
+        const total=Object.values(data.availability||{}).reduce((s,h)=>s+h.length,0);
+        const ec=(data.exceptions||[]).length;
+        const es=ec>0?`<div class="exc-summary">⚡ ${ec} exception${ec!==1?'s':''} scheduled</div>`:'';
+        return `<div class="player-card" onclick="showPlayerDetails('${name}')"><h4>${name}</h4>${es}<p><strong>Timezone:</strong> ${data.timezone}</p><p><strong>Availability:</strong> ${total} hrs/week</p>${data.notes?`<p><strong>Notes:</strong> ${data.notes}</p>`:''}<div class="player-card-actions"><button class="btn-danger" onclick="event.stopPropagation();deletePlayer('${name}')">🗑 Remove</button></div></div>`;
+    }).join('');
+}
+
+function showPlayerDetails(name){
+    const p=teamData[name]; if(!p) return;
+    const sl={'not-available':'❌ Whole day unavailable','partial-unavailable':'🚫 Blocked hours','available':'✅ Whole day available','custom':'🕐 Custom hours only'};
+    // Exceptions FIRST
+    let excHTML='';
+    if(p.exceptions?.length>0) excHTML=`<div class="modal-section"><h3>⚡ Special Dates / Exceptions</h3>${p.exceptions.map(exc=>`<div class="exc-modal-item"><span class="info-label">${exc.date}</span><span class="info-value">${sl[exc.status]||exc.status}${exc.notes?' — '+exc.notes:''}</span></div>`).join('')}</div>`;
+    const schHTML='<div class="schedule-grid">'+DAYS.map(day=>{ const hrs=p.availability?.[day]||[]; return `<div class="day-schedule"><h4>${day}</h4><div class="hours-display">${hrs.length?formatHours(hrs):'<span class="no-availability">Not available</span>'}</div></div>`; }).join('')+'</div>';
+    const total=Object.values(p.availability||{}).reduce((s,h)=>s+h.length,0);
+    document.getElementById('modalPlayerContent').innerHTML=`<div class="modal-header"><h2>${name}</h2><div style="display:flex;gap:6px;"><button class="btn-danger" onclick="deletePlayer('${name}')">🗑 Remove</button><button class="close-modal" onclick="closePlayerModal()">✕</button></div></div><div class="modal-section"><h3>📋 General</h3><div class="info-grid"><div class="info-item"><span class="info-label">Timezone</span><span class="info-value">${p.timezone}</span></div><div class="info-item"><span class="info-label">Hours/week</span><span class="info-value">${total}</span></div>${p.notes?`<div class="info-item"><span class="info-label">Notes</span><span class="info-value">${p.notes}</span></div>`:''}</div></div>${excHTML}<div class="modal-section"><h3>📅 Weekly Schedule (UTC)</h3>${schHTML}</div>`;
+    document.getElementById('playerModal').classList.add('active');
+}
+function closePlayerModal(){ document.getElementById('playerModal').classList.remove('active'); }
+
+function openAddPlayer(){
+    document.getElementById('newPlayerName').value='';
+    document.getElementById('newPlayerNotes').value='';
+    document.getElementById('newPlayerTimezone').value='UTC';
+    document.getElementById('addPlayerModal').classList.add('active');
+    setTimeout(()=>document.getElementById('newPlayerName').focus(),100);
+}
+function closeAddPlayer(){ document.getElementById('addPlayerModal').classList.remove('active'); }
+
+function confirmAddPlayer(){
+    const name = document.getElementById('newPlayerName').value.trim().toUpperCase();
+    if(!name){ alert('Please enter a player name.'); return; }
+    if(teamData[name]){ alert(`"${name}" already exists.`); return; }
+    teamData[name] = {
+        timezone: document.getElementById('newPlayerTimezone').value,
+        availability: {Monday:[],Tuesday:[],Wednesday:[],Thursday:[],Friday:[],Saturday:[],Sunday:[]},
+        notes: document.getElementById('newPlayerNotes').value.trim(),
+        exceptions: []
+    };
+    saveData();
+    populatePlayerSelects();
+    updateView();
+    updatePlayersList();
+    closeAddPlayer();
+    // Switch to Update Schedule so they can fill in their hours right away
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('update').classList.add('active');
+    document.getElementById('updatePlayerSelect').value=name;
+    loadPlayerData();
+}
+
+function deleteCurrentPlayer(){
+    const name=document.getElementById('updatePlayerSelect').value;
+    if(!name){ alert('Select a player first.'); return; }
+    deletePlayer(name);
+    document.getElementById('saveBarLabel').textContent='Select your name to start editing';
+    document.getElementById('updatePlayerSelect').value='';
+}
+
+function deletePlayer(name){
+    if(!confirm(`Remove "${name}" from the roster? This cannot be undone.`)) return;
+    delete teamData[name];
+    saveData();
+    populatePlayerSelects();
+    updateView();
+    updatePlayersList();
+    closePlayerModal();
+}
+
+window.onclick=e=>{ 
+    if(e.target===document.getElementById('playerModal')) closePlayerModal(); 
+    if(e.target===document.getElementById('addPlayerModal')) closeAddPlayer();
+};
+window.onclick=e=>{ if(e.target===document.getElementById('playerModal')) closePlayerModal(); };
+
+function formatHours(hours){
+    if(!hours.length) return '';
+    const s=[...hours].sort((a,b)=>a-b); const r=[]; let st=s[0],en=s[0];
+    for(let i=1;i<=s.length;i++){ if(i<s.length&&s[i]===en+1){en=s[i];}else{const a=st.toString().padStart(2,'0')+':00',b=en.toString().padStart(2,'0')+':00';r.push(st===en?a:`${a} – ${b}`);if(i<s.length){st=s[i];en=s[i];}}}
+    return r.join(', ');
+}
+
+let exceptionCounter=0;
+
+// Generate <option> elements for 0-23 hours
+function hourOptions(selected) {
+    let s='';
+    for(let h=0;h<24;h++) s+=`<option value="${h}" ${h===selected?'selected':''}>${String(h).padStart(2,'0')}:00</option>`;
+    return s;
+}
+
+// Parse stored notes "HH:MM-HH:MM" back into {from, to} integers
+function parseNotes(notes) {
+    const m=(notes||'').match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+    return m ? {from:parseInt(m[1]), to:parseInt(m[3])} : {from:14, to:18};
+}
+
+// Build notes string from selectors
+function notesFromSelectors(row) {
+    const f=row.querySelector('.exc-from'), t=row.querySelector('.exc-to');
+    if(!f||!t) return '';
+    return `${String(f.value).padStart(2,'0')}:00-${String(t.value).padStart(2,'0')}:00`;
+}
+
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function addExceptionRow(date='', status='not-available', notes='') {
+    const id = `exception-${exceptionCounter++}`;
+    const {from, to} = parseNotes(notes);
+    const needsTime = status==='partial-unavailable'||status==='custom';
+    const timeHTML = `<div class="exc-row2 exc-time-row" style="${needsTime?'':'display:none'}">
+        <div class="exc-time-group"><span class="exc-time-label">From</span>
+            <select class="exc-from">${hourOptions(from)}</select></div>
+        <div class="exc-time-group"><span class="exc-time-label">To</span>
+            <select class="exc-to">${hourOptions(to)}</select></div>
+    </div>`;
+    const row = document.createElement('div');
+    row.className='exception-item'; row.id=id;
+    row.innerHTML=`
+        <div class="exc-row1">
+            <input type="date" class="exception-date" value="${date}" min="${todayStr()}">
+            <select class="exception-status" onchange="toggleExcTime(this)">
+                <option value="not-available"       ${status==='not-available'      ?'selected':''}>❌ Whole day unavailable</option>
+                <option value="partial-unavailable" ${status==='partial-unavailable'?'selected':''}>🚫 Blocked hours</option>
+                <option value="available"           ${status==='available'          ?'selected':''}>✅ Whole day available</option>
+                <option value="custom"              ${status==='custom'             ?'selected':''}>🕐 Only available these hours</option>
+            </select>
+            <button class="btn-remove" onclick="removeExc('${id}')">✕</button>
+        </div>
+        ${timeHTML}`;
+    document.getElementById('exceptionsContainer').appendChild(row);
+}
+
+function toggleExcTime(sel) {
+    const needsTime = sel.value==='partial-unavailable'||sel.value==='custom';
+    sel.closest('.exception-item').querySelector('.exc-time-row').style.display = needsTime?'':'none';
+}
+
+function removeExc(id){ document.getElementById(id)?.remove(); }
+
+function loadExceptions(excs){
+    document.getElementById('exceptionsContainer').innerHTML='';
+    (excs||[]).forEach(e=>addExceptionRow(e.date, e.status, e.notes));
+}
+
+function getExceptions(){
+    return [...document.querySelectorAll('.exception-item')].reduce((acc,item)=>{
+        const date=item.querySelector('.exception-date').value;
+        if(!date) return acc;
+        const status=item.querySelector('.exception-status').value;
+        const needsTime=status==='partial-unavailable'||status==='custom';
+        const notes=needsTime ? notesFromSelectors(item) : (item.querySelector('.exc-notes-opt')?.value||'');
+        acc.push({date,status,notes});
+        return acc;
+    },[]);
+}
+
+function toggleTheme(){ const d=document.documentElement.getAttribute('data-theme')==='dark'; const t=d?'light':'dark'; document.documentElement.setAttribute('data-theme',t); document.getElementById('themeIcon').textContent=t==='dark'?'☀️':'🌙'; try{localStorage.setItem('ftb-theme',t);}catch(e){} }
+function applyStoredTheme(){ let t='dark'; try{t=localStorage.getItem('ftb-theme')||'dark';}catch(e){} document.documentElement.setAttribute('data-theme',t); const i=document.getElementById('themeIcon'); if(i)i.textContent=t==='dark'?'☀️':'🌙'; }
+
+applyStoredTheme();
+initializeData();
+</script>
+
+</body>
+</html>
