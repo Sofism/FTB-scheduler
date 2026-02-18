@@ -121,7 +121,7 @@
     .theme-toggle:hover { border-color:var(--accent); }
 
     /* TABS */
-    .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:14px; background:transparent; overflow-x:auto; }
+    .tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:14px; background:var(--bg-page); overflow-x:auto; }
     .tab { flex-shrink:0; padding:8px 16px; background:transparent; border:none; color:var(--text-sec); font-family:'Barlow Condensed',sans-serif; font-size:clamp(.8em,2.5vw,1em); font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:color .15s; position:relative; white-space:nowrap; }
     .tab:hover { color:var(--text-pri); }
     .tab.active { color:var(--text-pri); }
@@ -143,8 +143,8 @@
     .btn:hover { background:var(--tab-hover); }
     .btn-primary { background:var(--accent); color:#fff; border-color:transparent; }
     .btn-primary:hover { opacity:.88; }
-    .btn-purple { background:var(--purple); color:#fff; border-color:transparent; }
-    .btn-purple:hover { opacity:.88; }
+    .btn-purple { background:transparent; color:var(--accent); border-color:var(--accent); }
+    .btn-purple:hover { background:rgba(255,0,110,.08); }
     .btn-secondary { background:transparent; color:var(--text-sec); border:1px solid var(--border); }
     .btn-secondary:hover { background:var(--tab-hover); color:var(--text-pri); }
     .btn-danger { background:transparent; color:var(--red); border:1px solid var(--border); }
@@ -157,8 +157,8 @@
 
     /* TABLE */
     .grid-container { overflow-x:auto; border:1px solid var(--border); border-radius:6px; margin-top:12px; -webkit-overflow-scrolling:touch; }
-    table { width:100%; border-collapse:collapse; font-size:.79em; background:var(--tbl-bg); }
-    th, td { padding:6px 6px; text-align:center; border:1px solid var(--tbl-border); min-width:96px; }
+    table { width:100%; border-collapse:collapse; font-size:.74em; background:var(--tbl-bg); }
+    th, td { padding:4px 4px; text-align:center; border:1px solid var(--tbl-border); min-width:78px; }
     th { background:var(--tbl-header); color:var(--text-pri); font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:.8em; letter-spacing:1px; text-transform:uppercase; position:sticky; top:0; z-index:10; border-bottom:2px solid var(--accent); line-height:1.3; }
     th .th-day { display:block; }
     th .th-date { display:block; font-size:.8em; font-weight:600; color:var(--text-sec); margin-top:1px; }
@@ -167,7 +167,7 @@
     th.col-has-exception .th-date { color:var(--orange); }
     th:first-child { position:sticky; left:0; z-index:11; }
     td:first-child { background:var(--tbl-header); position:sticky; left:0; z-index:5; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:.82em; color:var(--text-sec); border-right:1px solid var(--border); }
-    .availability-cell { vertical-align:top; padding:4px 3px; transition:opacity .1s; }
+    .availability-cell { vertical-align:top; padding:3px 2px; transition:opacity .1s; }
     .availability-cell:hover { opacity:.82; }
 
     /* CELLS */
@@ -182,8 +182,8 @@
     .av-5 .player-tag  { background:var(--t5-bg); border-color:var(--t5-bd); color:var(--t5-c); }
     .av-6 .player-tag  { background:var(--t6-bg); border-color:var(--t6-bd); color:var(--t6-c); }
     .av-7p .player-tag { background:var(--t7-bg); border-color:var(--t7-bd); color:var(--t7-c); }
-    .player-names { display:flex; flex-direction:column; gap:2px; font-size:.78em; }
-    .player-tag { padding:2px 4px; border-radius:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:var(--tag-bg); border:1px solid var(--tag-bd); color:var(--tag-c); }
+    .player-names { display:flex; flex-direction:column; gap:1px; font-size:.74em; }
+    .player-tag { padding:1px 3px; border-radius:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:var(--tag-bg); border:1px solid var(--tag-bd); color:var(--tag-c); }
 
     /* EXCEPTION BADGE */
     .exc-badge { display:inline-block; margin-top:3px; padding:1px 7px; background:rgba(255,170,0,.15); border:1px solid rgba(255,170,0,.4); border-radius:20px; color:#b87800; font-size:.68em; font-weight:700; font-family:'Barlow Condensed',sans-serif; letter-spacing:.5px; text-transform:uppercase; }
@@ -204,6 +204,7 @@
     .window-players-toggle { font-size:.7em; color:var(--text-faint); padding:8px 11px; border-left:1px solid var(--border-sub); white-space:nowrap; }
     .window-players-list { display:none; width:100%; padding:6px 11px 8px 90px; background:var(--tab-hover); border-top:1px solid var(--border-sub); gap:5px; flex-wrap:wrap; font-size:.77em; }
     .window-players-list.open { display:flex; }
+    .wl-label { font-size:.7em; color:var(--text-faint); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; margin-right:4px; align-self:center; }
     .player-chip { background:var(--chip-bg); border:1px solid var(--chip-bd); border-radius:20px; padding:1px 8px; font-family:'Barlow Condensed',sans-serif; font-weight:600; letter-spacing:1px; text-transform:uppercase; font-size:.84em; color:var(--chip-c); }
 
     /* LEGEND */
@@ -406,7 +407,7 @@
 <div id="players" class="tab-content">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
         <h3 style="color:var(--text-primary);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;">Team Members</h3>
-        <button class="btn btn-purple" onclick="openAddPlayer()">+ Add Player</button>
+        <button class="btn btn-secondary" onclick="openAddPlayer()">+ Add Player</button>
     </div>
     <div class="player-list" id="playersList"></div>
 </div>
@@ -432,7 +433,7 @@
         <div class="field"><label>Notes (optional)</label><input type="text" id="newPlayerNotes" placeholder="e.g. Weekends only"></div>
         <div class="actions">
             <button class="btn btn-secondary" onclick="closeAddPlayer()">Cancel</button>
-            <button class="btn btn-purple" onclick="confirmAddPlayer()">Add Player</button>
+            <button class="btn btn-primary" onclick="confirmAddPlayer()">Add Player</button>
         </div>
     </div>
 </div>
@@ -463,20 +464,53 @@ const initialTeamData = {
 const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 let teamData={};
 
+// ── API helpers ─────────────────────────────────────────────────────────────
+function showStatus(msg, isError=false){
+    let el = document.getElementById('statusToast');
+    if(!el){ el=document.createElement('div'); el.id='statusToast'; document.body.appendChild(el); }
+    el.textContent = msg;
+    el.className = 'status-toast ' + (isError ? 'toast-error' : 'toast-ok');
+    el.style.display = 'block';
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>{ el.style.display='none'; }, 2800);
+}
+
 async function initializeData(){
-    try{
-        const s=localStorage.getItem('fixthatbase-team-data-v2');
-        if(s){
-            teamData=JSON.parse(s);
-            // Ensure every player has an exceptions array (missing in older saved data)
-            Object.keys(teamData).forEach(p=>{ if(!teamData[p].exceptions) teamData[p].exceptions=[]; });
-        } else {
-            teamData=JSON.parse(JSON.stringify(initialTeamData));
-        }
-    } catch(e){ teamData=JSON.parse(JSON.stringify(initialTeamData)); }
+    try {
+        const res = await fetch('/api/get-data');
+        if(!res.ok) throw new Error('API error');
+        const json = await res.json();
+        teamData = json.data && Object.keys(json.data).length
+            ? json.data
+            : JSON.parse(JSON.stringify(initialTeamData));
+        // Ensure exceptions array on every player
+        Object.keys(teamData).forEach(p=>{ if(!teamData[p].exceptions) teamData[p].exceptions=[]; });
+    } catch(e) {
+        console.warn('API unavailable, using initial data:', e);
+        teamData = JSON.parse(JSON.stringify(initialTeamData));
+    }
     populatePlayerSelects(); generateDayForms(); updateView(); updatePlayersList();
 }
-async function saveData(){ try{ localStorage.setItem('fixthatbase-team-data-v2',JSON.stringify(teamData)); return true; }catch(e){ return false; } }
+
+async function savePlayerToAPI(name, playerData){
+    const res = await fetch('/api/save-player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, playerData })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    return true;
+}
+
+async function deletePlayerFromAPI(name){
+    const res = await fetch('/api/delete-player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    return true;
+}
 
 function populatePlayerSelects(){
     const names=Object.keys(teamData).sort();
@@ -611,9 +645,20 @@ function updateBestTimes(av,userTZ,selD){
             const e=convertTime(w.endUTC,'UTC',userTZ).toString().padStart(2,'0')+':00';
             const bc=w.peak>=7?'badge-7':w.peak===6?'badge-6':'badge-5';
             const bl=`${w.peak} player${w.peak!==1?'s':''}${w.peak>=7?' ★':''}`;
-            const ds=w.days.length===7?'Every day':w.days.length>2?w.days.slice(0,2).map(d=>d.slice(0,3).toUpperCase()).join(' · ')+'…':w.days.map(d=>d.slice(0,3).toUpperCase()).join(' · ');
-            const chips=w.peakP.map(p=>`<span class="player-chip">${p}</span>`).join('');
-            html+=`<div><div class="window-row" onclick="toggleWP(${idx})"><span class="window-day">${ds}</span><span class="window-time">${s} – ${e} ${userTZ}</span><span class="window-badge ${bc}">${bl}</span><span class="window-players-toggle" id="tg-${idx}">▾ ${w.peakP.length}</span></div><div class="window-players-list" id="wp-${idx}">${chips}</div></div>`;
+            const ds = w.days.length === 7 ? 'Every day' : w.days.map(d => d.slice(0,3).toUpperCase()).join(' · ');
+            const chips = w.peakP.map(p => '<span class="player-chip">' + p + '</span>').join('');
+            const dayChips = w.days.length < 7
+                ? '<span class="wl-label">Days:</span>' + w.days.map(d => '<span class="player-chip">' + d.slice(0,3).toUpperCase() + '</span>').join('')
+                : '';
+            html += '<div>'
+                + '<div class="window-row" onclick="toggleWP(' + idx + ')">'
+                +   '<span class="window-day">' + ds + '</span>'
+                +   '<span class="window-time">' + s + ' – ' + e + ' ' + userTZ + '</span>'
+                +   '<span class="window-badge ' + bc + '">' + bl + '</span>'
+                +   '<span class="window-players-toggle" id="tg-' + idx + '">▾ ' + w.peakP.length + '</span>'
+                + '</div>'
+                + '<div class="window-players-list" id="wp-' + idx + '">' + dayChips + chips + '</div>'
+                + '</div>';
         });
         html+='</div>';
     } else { html+=`<p style="color:var(--text-muted);font-size:.84em;padding:6px 0">No windows with 5+ players found.</p>`; }
@@ -643,12 +688,21 @@ function clearAllTimes(){ DAYS.forEach(day=>{ for(let h=0;h<24;h++){const cb=doc
 function copyDay(){ const mh=[]; for(let h=0;h<24;h++){const cb=document.getElementById(`Monday-${h}`);if(cb&&cb.checked)mh.push(h);} DAYS.slice(1).forEach(day=>{for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb)cb.checked=mh.includes(h);}}); }
 
 async function saveAvailability(){
-    const name=document.getElementById('updatePlayerSelect').value; if(!name){alert('Please select your name');return;}
+    const name=document.getElementById('updatePlayerSelect').value;
+    if(!name){ alert('Please select your name'); return; }
     const av={};
     DAYS.forEach(day=>{ av[day]=[]; for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb&&cb.checked)av[day].push(h);} });
-    teamData[name]={timezone:document.getElementById('updateTimezone').value,availability:av,notes:document.getElementById('playerNotes').value,exceptions:getExceptions()};
-    if(await saveData()!==false){updateView();updatePlayersList();alert('✅ Saved!');}
-    else alert('⚠️ Could not persist. Changes apply this session only.');
+    const playerData={timezone:document.getElementById('updateTimezone').value,availability:av,notes:document.getElementById('playerNotes').value,exceptions:getExceptions()};
+    teamData[name]=playerData;
+    // Optimistic UI update
+    updateView(); updatePlayersList();
+    try {
+        await savePlayerToAPI(name, playerData);
+        showStatus('✅ ' + name + ' saved!');
+    } catch(e) {
+        console.error('Save error:', e);
+        showStatus('⚠️ Save failed — changes visible this session only', true);
+    }
 }
 
 function updatePlayersList(){
@@ -693,7 +747,6 @@ function confirmAddPlayer(){
         notes: document.getElementById('newPlayerNotes').value.trim(),
         exceptions: []
     };
-    saveData();
     populatePlayerSelects();
     updateView();
     updatePlayersList();
@@ -705,6 +758,10 @@ function confirmAddPlayer(){
     document.getElementById('update').classList.add('active');
     document.getElementById('updatePlayerSelect').value=name;
     loadPlayerData();
+    // Save to API in background
+    savePlayerToAPI(name, teamData[name])
+        .then(()=>showStatus('✅ ' + name + ' added!'))
+        .catch(()=>showStatus('⚠️ Added locally — save failed', true));
 }
 
 function deleteCurrentPlayer(){
@@ -715,14 +772,20 @@ function deleteCurrentPlayer(){
     document.getElementById('updatePlayerSelect').value='';
 }
 
-function deletePlayer(name){
+async function deletePlayer(name){
     if(!confirm(`Remove "${name}" from the roster? This cannot be undone.`)) return;
     delete teamData[name];
-    saveData();
     populatePlayerSelects();
     updateView();
     updatePlayersList();
     closePlayerModal();
+    try {
+        await deletePlayerFromAPI(name);
+        showStatus('🗑 ' + name + ' removed');
+    } catch(e) {
+        console.error('Delete error:', e);
+        showStatus('⚠️ Removed locally — server delete failed', true);
+    }
 }
 
 window.onclick=e=>{ 
