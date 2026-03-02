@@ -8,6 +8,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
+```
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     /* ── LIGHT (original warm palette) ── */
@@ -257,6 +258,7 @@
     .player-card:hover { background:var(--tab-hover); border-color:var(--border); }
     .player-card h4 { font-family:'Barlow Condensed',sans-serif; font-weight:700; letter-spacing:2px; text-transform:uppercase; font-size:.95em; color:var(--text-pri); margin-bottom:5px; }
     .player-card p { font-size:.78em; color:var(--text-sec); margin:2px 0; }
+    .last-updated { display:inline-block; margin-bottom:4px; font-size:.7em; color:var(--text-faint); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; }
     .exc-summary { display:inline-block; margin-top:6px; padding:2px 8px; background:var(--orange-bg); border:1px solid rgba(255,170,0,.3); border-radius:20px; font-size:.7em; color:#b87800; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; }
     [data-theme="dark"] .exc-summary { color:var(--orange); }
     .player-card-actions { display:flex; justify-content:flex-end; margin-top:8px; }
@@ -300,6 +302,7 @@
     .status-toast { display:none; position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 18px; border-radius:6px; font-size:.84em; font-weight:600; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; box-shadow:0 4px 16px rgba(0,0,0,.2); }
     .toast-ok { background:#1a7f37; color:#fff; }
     .toast-error { background:#cc4444; color:#fff; }
+```
 
 </style>
 </head>
@@ -316,6 +319,7 @@
         <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><span id="themeIcon">🌙</span></button>
     </div>
 
+```
 <div class="tabs">
     <button class="tab active" onclick="switchTab('overview',event)">📊 Overview</button>
     <button class="tab" onclick="switchTab('update',event)">✏️ Update Schedule</button>
@@ -366,6 +370,11 @@
 
 <!-- TAB 2 -->
 <div id="update" class="tab-content">
+    <div style="margin-bottom:12px;padding:10px 14px;background:var(--bg-subtle);border:1px solid var(--border-sub);border-left:2px solid var(--accent2);border-radius:6px;font-size:.8em;color:var(--text-sec);line-height:1.6;">
+        <strong style="color:var(--text-pri);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:1.05em;">How to update your schedule</strong><br>
+        1. Select your name · 2. Set your timezone · 3. Check the hours you're <em>generally</em> available each week · 4. Add exceptions for specific dates (holidays, events) · 5. Hit <strong>Save Schedule</strong>.<br>
+        <span style="color:var(--text-faint);">All times are stored in UTC and shown to your teammates in their own timezone.</span>
+    </div>
     <div class="save-bar">
         <span id="saveBarLabel">Select your name to start editing</span>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -404,6 +413,7 @@
         <button class="quick-btn" onclick="clearAllTimes()">Clear All</button>
         <button class="quick-btn" onclick="copyDay()">Copy Mon → All</button>
     </div>
+    <div style="margin:10px 0 6px;font-size:.72em;color:var(--text-faint);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;">✔ Check the hours you're typically available — use exceptions above for specific dates</div>
     <div id="daysContainer"></div>
     <div class="form-section">
         <h3>Additional Notes</h3>
@@ -420,6 +430,7 @@
     </div>
     <div class="player-list" id="playersList"></div>
 </div>
+```
 
 </div>
 
@@ -757,7 +768,7 @@ async function saveAvailability(){
     if(!name){ alert('Please select your name'); return; }
     const av={};
     DAYS.forEach(day=>{ av[day]=[]; for(let h=0;h<24;h++){const cb=document.getElementById(`${day}-${h}`);if(cb&&cb.checked)av[day].push(h);} });
-    const playerData={timezone:document.getElementById('updateTimezone').value,availability:av,notes:document.getElementById('playerNotes').value,exceptions:getExceptions()};
+    const playerData={timezone:document.getElementById('updateTimezone').value,availability:av,notes:document.getElementById('playerNotes').value,exceptions:getExceptions(),updatedAt:new Date().toISOString()};
     teamData[name]=playerData;
     // Optimistic UI update
     updateView(); updatePlayersList();
@@ -776,7 +787,9 @@ function updatePlayersList(){
         const total=Object.values(data.availability||{}).reduce((s,h)=>s+h.length,0);
         const ec=(data.exceptions||[]).length;
         const es=ec>0?`<div class="exc-summary">⚡ ${ec} exception${ec!==1?'s':''} scheduled</div>`:'';
-        return `<div class="player-card" onclick="showPlayerDetails('${name}')"><h4>${name}</h4>${es}<p><strong>Timezone:</strong> ${data.timezone}</p><p><strong>Availability:</strong> ${total} hrs/week</p>${data.notes?`<p><strong>Notes:</strong> ${data.notes}</p>`:''}<div class="player-card-actions"><button class="btn-danger" onclick="event.stopPropagation();deletePlayer('${name}')">🗑 Remove</button></div></div>`;
+        const ago = data.updatedAt ? timeAgo(data.updatedAt) : null;
+        const lastUp = ago ? `<span class="last-updated">↻ ${ago}</span>` : '';
+        return `<div class="player-card" onclick="showPlayerDetails('${name}')"><h4>${name}</h4>${lastUp}${es}<p><strong>Timezone:</strong> ${data.timezone}</p><p><strong>Availability:</strong> ${total} hrs/week</p>${data.notes?`<p><strong>Notes:</strong> ${data.notes}</p>`:''}<div class="player-card-actions"><button class="btn-danger" onclick="event.stopPropagation();deletePlayer('${name}')">🗑 Remove</button></div></div>`;
     }).join('');
 }
 
@@ -788,7 +801,7 @@ function showPlayerDetails(name){
     if(p.exceptions?.length>0) excHTML=`<div class="modal-section"><h3>⚡ Special Dates / Exceptions</h3>${p.exceptions.map(exc=>`<div class="exc-modal-item"><span class="info-label">${exc.date}</span><span class="info-value">${sl[exc.status]||exc.status}${exc.notes?' — '+exc.notes:''}</span></div>`).join('')}</div>`;
     const schHTML='<div class="schedule-grid">'+DAYS.map(day=>{ const hrs=p.availability?.[day]||[]; return `<div class="day-schedule"><h4>${day}</h4><div class="hours-display">${hrs.length?formatHours(hrs):'<span class="no-availability">Not available</span>'}</div></div>`; }).join('')+'</div>';
     const total=Object.values(p.availability||{}).reduce((s,h)=>s+h.length,0);
-    document.getElementById('modalPlayerContent').innerHTML=`<div class="modal-header"><h2>${name}</h2><div style="display:flex;gap:6px;"><button class="btn-danger" onclick="deletePlayer('${name}')">🗑 Remove</button><button class="close-modal" onclick="closePlayerModal()">✕</button></div></div><div class="modal-section"><h3>📋 General</h3><div class="info-grid"><div class="info-item"><span class="info-label">Timezone</span><span class="info-value">${p.timezone}</span></div><div class="info-item"><span class="info-label">Hours/week</span><span class="info-value">${total}</span></div>${p.notes?`<div class="info-item"><span class="info-label">Notes</span><span class="info-value">${p.notes}</span></div>`:''}</div></div>${excHTML}<div class="modal-section"><h3>📅 Weekly Schedule (UTC)</h3>${schHTML}</div>`;
+    document.getElementById('modalPlayerContent').innerHTML=`<div class="modal-header"><h2>${name}</h2><div style="display:flex;gap:6px;"><button class="btn-danger" onclick="deletePlayer('${name}')">🗑 Remove</button><button class="close-modal" onclick="closePlayerModal()">✕</button></div></div><div class="modal-section"><h3>📋 General</h3><div class="info-grid"><div class="info-item"><span class="info-label">Timezone</span><span class="info-value">${p.timezone}</span></div><div class="info-item"><span class="info-label">Hours/week</span><span class="info-value">${total}</span></div>${p.updatedAt?`<div class="info-item"><span class="info-label">Last updated</span><span class="info-value">${timeAgo(p.updatedAt)}</span></div>`:''} ${p.notes?`<div class="info-item"><span class="info-label">Notes</span><span class="info-value">${p.notes}</span></div>`:''}</div></div>${excHTML}<div class="modal-section"><h3>📅 Weekly Schedule (UTC)</h3>${schHTML}</div>`;
     document.getElementById('playerModal').classList.add('active');
 }
 function closePlayerModal(){ document.getElementById('playerModal').classList.remove('active'); }
@@ -877,6 +890,16 @@ window.onclick=e=>{
     if(e.target===document.getElementById('playerModal')) closePlayerModal(); 
     if(e.target===document.getElementById('addPlayerModal')) closeAddPlayer();
 };
+
+function timeAgo(iso){
+    if(!iso) return null;
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if(diff < 60) return 'just now';
+    if(diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if(diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    if(diff < 86400*7) return Math.floor(diff/86400) + 'd ago';
+    return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
 
 function formatHours(hours){
     if(!hours.length) return '';
