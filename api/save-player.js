@@ -13,7 +13,7 @@ const { name, playerData } = req.body;
 if (!name || typeof name !== ‘string’) return res.status(400).json({ error: ‘Missing name’ });
 if (!playerData || typeof playerData !== ‘object’) return res.status(400).json({ error: ‘Missing playerData’ });
 
-```
+
 const current = (await redis.get('fixthatbase:teamdata')) || {};
 const isNew = !current[name];
 current[name] = playerData;
@@ -52,7 +52,6 @@ if (webhookUrl) {
 }
 
 res.status(200).json({ ok: true, name });
-```
 
 } catch (err) {
 console.error(‘SAVE error:’, err);
