@@ -8,6 +8,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
+```
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     /* ── LIGHT (original warm palette) ── */
@@ -245,6 +246,7 @@
     .exc-row2 { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
     .exc-time-group { display:flex; align-items:center; gap:5px; }
     .exc-time-label { font-family:'Barlow Condensed',sans-serif; font-size:.7em; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-sec); white-space:nowrap; }
+    .exc-tz-hint { font-size:.68em; color:var(--text-faint); font-family:'Barlow Condensed',sans-serif; margin-left:4px; }
     .exc-time-group select { width:auto; padding:4px 8px; font-size:.82em; }
     .btn-remove { padding:4px 10px; background:transparent; color:var(--red); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:.78em; transition:all .12s; white-space:nowrap; }
     .btn-remove:hover { background:var(--red-bg); border-color:var(--red); }
@@ -301,6 +303,8 @@
     .status-toast { display:none; position:fixed; bottom:20px; right:20px; z-index:9999; padding:10px 18px; border-radius:6px; font-size:.84em; font-weight:600; font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; text-transform:uppercase; box-shadow:0 4px 16px rgba(0,0,0,.2); }
     .toast-ok { background:#1a7f37; color:#fff; }
     .toast-error { background:#cc4444; color:#fff; }
+```
+
 </style>
 </head>
 <body>
@@ -316,6 +320,7 @@
         <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><span id="themeIcon">🌙</span></button>
     </div>
 
+```
 <div class="tabs">
     <button class="tab active" onclick="switchTab('overview',event)">📊 Overview</button>
     <button class="tab" onclick="switchTab('update',event)">✏️ Update Schedule</button>
@@ -426,6 +431,7 @@
     </div>
     <div class="player-list" id="playersList"></div>
 </div>
+```
 
 </div>
 
@@ -912,17 +918,22 @@ function hourOptions(selected) {
     return s;
 }
 
-// Parse stored notes "HH:MM-HH:MM" back into {from, to} integers
+// Parse stored UTC notes "HH:MM-HH:MM" and convert to local for display
 function parseNotes(notes) {
     const m=(notes||'').match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
-    return m ? {from:parseInt(m[1]), to:parseInt(m[3])} : {from:14, to:18};
+    if(!m) return {from:14, to:18};
+    const tz = getFormTZ();
+    return { from: utcToLocal(parseInt(m[1]), tz), to: utcToLocal(parseInt(m[3]), tz) };
 }
 
-// Build notes string from selectors
+// Build notes string from selectors — converts local hours to UTC for storage
 function notesFromSelectors(row) {
     const f=row.querySelector('.exc-from'), t=row.querySelector('.exc-to');
     if(!f||!t) return '';
-    return `${String(f.value).padStart(2,'0')}:00-${String(t.value).padStart(2,'0')}:00`;
+    const tz = getFormTZ();
+    const fromUTC = localToUtc(parseInt(f.value), tz);
+    const toUTC   = localToUtc(parseInt(t.value), tz);
+    return String(fromUTC).padStart(2,'0') + ':00-' + String(toUTC).padStart(2,'0') + ':00';
 }
 
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -935,7 +946,8 @@ function addExceptionRow(date='', status='not-available', notes='') {
         <div class="exc-time-group"><span class="exc-time-label">From</span>
             <select class="exc-from">${hourOptions(from)}</select></div>
         <div class="exc-time-group"><span class="exc-time-label">To</span>
-            <select class="exc-to">${hourOptions(to)}</select></div>
+            <select class="exc-to">${hourOptions(to)}</select>
+            <span class="exc-tz-hint">(your local time)</span></div>
     </div>`;
     const row = document.createElement('div');
     row.className='exception-item'; row.id=id;
@@ -985,7 +997,7 @@ function showExcTooltip(e, day){
     document.getElementById('excTooltipBody').innerHTML = info.map(x=>
         '<div class="exc-tooltip-item">' +
         '<span class="exc-tooltip-player">' + x.player + '</span>' +
-        '<span class="exc-tooltip-status">' + x.label + (x.notes?' · '+x.notes:'') + '</span>' +
+        '<span class="exc-tooltip-status">' + x.label + (x.notes ? ' · ' + (()=>{ const m=x.notes.match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/); if(!m) return x.notes; const tz=document.getElementById('userTimezone').value; const f=utcToLocal(parseInt(m[1]),tz),t=utcToLocal(parseInt(m[3]),tz); return String(f).padStart(2,'0')+':00 – '+String(t).padStart(2,'0')+':00 ('+tz+')'; })() : '') + '</span>' +
         '</div>'
     ).join('');
     tooltip.classList.add('visible');
