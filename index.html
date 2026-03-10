@@ -330,11 +330,20 @@
         <div class="control-group">
             <label>Timezone</label>
             <select id="userTimezone" onchange="updateView()">
-                <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
-                <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
-                <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
-                <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
-                <option value="UTC+5:30">UTC+5:30 (India)</option>
+                <option value="UTC">UTC</option>
+                <option value="UTC-10">HST</option>
+                <option value="UTC-8">PST</option>
+                <option value="UTC-7">PDT</option>
+                <option value="UTC-7">MST</option>
+                <option value="UTC-6">CST</option>
+                <option value="UTC-5">CDT</option>
+                <option value="UTC-5">EST</option>
+                <option value="UTC-4">EDT</option>
+                <option value="UTC-3">UTC-3</option>
+                <option value="UTC+1">CET</option>
+                <option value="UTC+2">CEST</option>
+                <option value="UTC+3">UTC+3</option>
+                <option value="UTC+5:30">IST</option>
             </select>
         </div>
         <div class="control-group">
@@ -351,6 +360,7 @@
             </select>
         </div>
         <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+        <button class="btn btn-secondary" id="dstToggleBtn" onclick="toggleDST()" title="Shift DST timezones (PST/CST/EST) ±1h for summer/winter">🕐 Winter</button>
     </div>
     <div id="bestTimes"></div>
     <div class="grid-container">
@@ -390,11 +400,20 @@
             <div class="control-group">
                 <label>Your timezone</label>
                 <select id="updateTimezone" onchange="onPlayerTimezoneChange()">
-                    <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
-                    <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
-                    <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
-                    <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
-                    <option value="UTC+5:30">UTC+5:30 (India)</option>
+                    <option value="UTC">UTC</option>
+                    <option value="UTC-10">HST</option>
+                    <option value="UTC-8">PST</option>
+                    <option value="UTC-7">PDT</option>
+                    <option value="UTC-7">MST</option>
+                    <option value="UTC-6">CST</option>
+                    <option value="UTC-5">CDT</option>
+                    <option value="UTC-5">EST</option>
+                    <option value="UTC-4">EDT</option>
+                    <option value="UTC-3">UTC-3</option>
+                    <option value="UTC+1">CET</option>
+                    <option value="UTC+2">CEST</option>
+                    <option value="UTC+3">UTC+3</option>
+                    <option value="UTC+5:30">IST</option>
                 </select>
                 <span style="font-size:.7em;color:var(--text-sec);margin-top:3px;display:block;">Schedule times shown in your timezone</span>
             </div>
@@ -429,7 +448,6 @@
     <div class="player-list" id="playersList"></div>
 </div>
 
-
 </div>
 
 <!-- Add Player Modal -->
@@ -440,12 +458,21 @@
         <div class="field"><label>Name</label><input type="text" id="newPlayerName" placeholder="e.g. ROCKSTAR"></div>
         <div class="field"><label>Timezone</label>
             <select id="newPlayerTimezone">
-                <option value="UTC">UTC</option><option value="UTC-10">UTC-10 (Hawaii)</option>
-                <option value="UTC-8">UTC-8 (PST)</option><option value="UTC-6">UTC-6 (CST)</option>
-                <option value="UTC-5">UTC-5 (EST)</option><option value="UTC-3">UTC-3</option>
-                <option value="UTC+1">UTC+1 (CET)</option><option value="UTC+3">UTC+3</option>
-                <option value="UTC+5:30">UTC+5:30 (India)</option>
-            </select>
+                        <option value="UTC">UTC</option>
+                        <option value="UTC-10">HST</option>
+                        <option value="UTC-8">PST</option>
+                        <option value="UTC-7">PDT</option>
+                        <option value="UTC-7">MST</option>
+                        <option value="UTC-6">CST</option>
+                        <option value="UTC-5">CDT</option>
+                        <option value="UTC-5">EST</option>
+                        <option value="UTC-4">EDT</option>
+                        <option value="UTC-3">UTC-3</option>
+                        <option value="UTC+1">CET</option>
+                        <option value="UTC+2">CEST</option>
+                        <option value="UTC+3">UTC+3</option>
+                        <option value="UTC+5:30">IST</option>
+                    </select>
         </div>
         <div class="field"><label>Notes (optional)</label><input type="text" id="newPlayerNotes" placeholder="e.g. Weekends only"></div>
         <div class="actions">
@@ -533,7 +560,15 @@ function populatePlayerSelects(){
     document.getElementById('updatePlayerSelect').innerHTML='<option value="">Select your name</option>'+names.map(n=>`<option value="${n}">${n}</option>`).join('');
 }
 
-function parseTimezone(tz){ if(tz==='UTC')return 0; const m=tz.match(/UTC([+-])(\d+)(?::(\d+))?/); if(!m)return 0; return(m[1]==='+'?1:-1)*(parseInt(m[2])+(m[3]?parseInt(m[3]):0)/60); }
+// Named abbreviation offsets (hour offset from UTC)
+const TZ_ABBREV = {HST:-10,PST:-8,PDT:-7,MST:-7,CST:-6,CDT:-5,EST:-5,EDT:-4};
+function parseTimezone(tz){
+    if(!tz||tz==='UTC') return 0;
+    if(TZ_ABBREV[tz] !== undefined) return TZ_ABBREV[tz];
+    const m=tz.match(/UTC([+-])(\d+)(?::(\d+))?/);
+    if(!m) return 0;
+    return (m[1]==='+'?1:-1)*(parseInt(m[2])+(m[3]?parseInt(m[3]):0)/60);
+}
 function convertTime(h,f,t){ let r=h+parseTimezone(t)-parseTimezone(f); while(r<0)r+=24; while(r>=24)r-=24; return Math.round(r); }
 
 // Dates auto-update every render — no hardcoded values
@@ -684,6 +719,48 @@ function updateBestTimes(av,userTZ,selD){
     document.getElementById('bestTimes').innerHTML=html;
 }
 function toggleWP(idx){ const l=document.getElementById('wp-'+idx),t=document.getElementById('tg-'+idx),o=l.classList.toggle('open'); t.textContent=o?'▴ hide':'▾ '+t.dataset.count; }
+
+// ── DST Toggle ───────────────────────────────────────────────────
+// Maps each timezone to its DST counterpart (Winter ↔ Summer)
+// DST swaps: Winter abbreviation → Summer abbreviation
+const DST_MAP_TO_SUMMER = {PST:'PDT', CST:'CDT', EST:'EDT', 'UTC-8':'UTC-7', 'UTC-6':'UTC-6', 'UTC-5':'UTC-4'};
+const DST_MAP_TO_WINTER = {PDT:'PST', CDT:'CST', EDT:'EST', 'UTC-7':'UTC-8', 'UTC-5':'UTC-6', 'UTC-4':'UTC-5'};
+let _dstMode = 'winter'; // current global mode
+
+function toggleDST(){
+    const toSummer = _dstMode === 'winter';
+    const map = toSummer ? DST_MAP_TO_SUMMER : DST_MAP_TO_WINTER;
+    _dstMode = toSummer ? 'summer' : 'winter';
+
+    // Update every player's stored timezone
+    let changed = 0;
+    Object.keys(teamData).forEach(name => {
+        const tz = teamData[name].timezone;
+        if(map[tz]){
+            teamData[name].timezone = map[tz];
+            teamData[name].updatedAt = new Date().toISOString();
+            changed++;
+            // Persist to API
+            savePlayerToAPI(name, teamData[name]).catch(()=>{});
+        }
+    });
+
+    // Update button label
+    const btn = document.getElementById('dstToggleBtn');
+    btn.textContent = toSummer ? '☀️ Summer' : '🕐 Winter';
+    btn.style.borderColor = toSummer ? 'var(--accent2)' : '';
+    btn.style.color       = toSummer ? 'var(--accent2)' : '';
+
+    // Refresh UI
+    updateView();
+    updatePlayersList();
+    populatePlayerSelects();
+
+    showStatus(toSummer
+        ? `☀️ Summer — ${changed} player${changed!==1?'s':''} → EDT/CDT/PDT`
+        : `❄️ Winter — ${changed} player${changed!==1?'s':''} → EST/CST/PST`
+    );
+}
 
 function resetFilters(){ document.getElementById('userTimezone').value='UTC'; for(let o of document.getElementById('playerFilter').options)o.selected=true; for(let o of document.getElementById('dayFilter').options)o.selected=true; updateView(); }
 function switchTab(n,e){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); if(e?.target)e.target.classList.add('active'); document.getElementById(n).classList.add('active'); }
