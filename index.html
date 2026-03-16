@@ -785,7 +785,7 @@ function generateDayForms(){
         h += `<div class="day-section"><h4>${day}</h4><div class="time-grid" id="day-${day}">`;
         for(let i = 0; i < 24; i++){
             const localH = utcToLocal(i, tz);
-            const label = localH.toString().padStart(2,'0') + ':00';
+            const label = fmtHour(localH);
             h += `<div class="time-slot"><input type="checkbox" id="${day}-${i}" value="${i}"><label for="${day}-${i}" id="lbl-${day}-${i}">${label}</label></div>`;
         }
         h += '</div></div>';
@@ -799,7 +799,7 @@ function relabelFormTimes(){
     DAYS.forEach(day => {
         for(let i = 0; i < 24; i++){
             const lbl = document.getElementById(`lbl-${day}-${i}`);
-            if(lbl) lbl.textContent = utcToLocal(i, tz).toString().padStart(2,'0') + ':00';
+            if(lbl) lbl.textContent = fmtHour(utcToLocal(i, tz));
         }
     });
 }
@@ -966,6 +966,13 @@ window.onclick=e=>{
     if(e.target===document.getElementById('addPlayerModal')) closeAddPlayer();
 };
 
+function fmtHour(h) {
+    const n = ((h % 24) + 24) % 24;
+    if(n === 0)  return '12 AM';
+    if(n === 12) return '12 PM';
+    return n < 12 ? n + ' AM' : (n - 12) + ' PM';
+}
+
 function timeAgo(iso){
     if(!iso) return null;
     const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -988,7 +995,7 @@ let exceptionCounter=0;
 // Generate <option> elements for 0-23 hours
 function hourOptions(selected) {
     let s='';
-    for(let h=0;h<24;h++) s+=`<option value="${h}" ${h===selected?'selected':''}>${String(h).padStart(2,'0')}:00</option>`;
+    for(let h=0;h<24;h++) s+=`<option value="${h}" ${h===selected?'selected':''}>${fmtHour(h)}</option>`;
     return s;
 }
 
