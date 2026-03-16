@@ -8,6 +8,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
+
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     /* ── LIGHT (original warm palette) ── */
@@ -303,6 +304,7 @@
     .toast-ok { background:#1a7f37; color:#fff; }
     .toast-error { background:#cc4444; color:#fff; }
 
+
 </style>
 </head>
 <body>
@@ -317,6 +319,7 @@
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><span id="themeIcon">🌙</span></button>
     </div>
+
 
 <div class="tabs">
     <button class="tab active" onclick="switchTab('overview',event)">📊 Overview</button>
@@ -448,6 +451,7 @@
     <div class="player-list" id="playersList"></div>
 </div>
 
+
 </div>
 
 <!-- Add Player Modal -->
@@ -525,6 +529,8 @@ async function initializeData(){
         teamData = json.data && Object.keys(json.data).length
             ? json.data
             : JSON.parse(JSON.stringify(initialTeamData));
+        // Restore DST mode saved in Redis
+        if(teamData.__dstMode){ _dstMode = teamData.__dstMode; delete teamData.__dstMode; }
         // Ensure exceptions array on every player
         Object.keys(teamData).forEach(p=>{ if(!teamData[p].exceptions) teamData[p].exceptions=[]; });
     } catch(e) {
@@ -532,6 +538,7 @@ async function initializeData(){
         teamData = JSON.parse(JSON.stringify(initialTeamData));
     }
     populatePlayerSelects(); generateDayForms(); updateView(); updatePlayersList();
+    applyDSTButtonState();
 }
 
 async function savePlayerToAPI(name, playerData){
@@ -542,6 +549,16 @@ async function savePlayerToAPI(name, playerData){
     });
     if(!res.ok) throw new Error(await res.text());
     return true;
+}
+
+async function saveDSTModeToAPI(mode){
+    try {
+        await fetch('/api/save-player', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: '__dstMode', playerData: mode })
+        });
+    } catch(e) { console.warn('DST mode save failed:', e); }
 }
 
 async function deletePlayerFromAPI(name){
@@ -722,10 +739,10 @@ function toggleWP(idx){ const l=document.getElementById('wp-'+idx),t=document.ge
 
 // ── DST Toggle ───────────────────────────────────────────────────
 // Maps each timezone to its DST counterpart (Winter ↔ Summer)
-// DST swaps: Winter abbreviation → Summer abbreviation
-const DST_MAP_TO_SUMMER = {PST:'PDT', CST:'CDT', EST:'EDT', 'UTC-8':'UTC-7', 'UTC-6':'UTC-6', 'UTC-5':'UTC-4'};
-const DST_MAP_TO_WINTER = {PDT:'PST', CDT:'CST', EDT:'EST', 'UTC-7':'UTC-8', 'UTC-5':'UTC-6', 'UTC-4':'UTC-5'};
-let _dstMode = 'winter'; // current global mode
+// DST swaps — handles both abbreviations and legacy UTC±X values
+const DST_MAP_TO_SUMMER = {PST:'PDT','UTC-8':'UTC-7', CST:'CDT','UTC-6':'UTC-5', EST:'EDT','UTC-5':'UTC-4'};
+const DST_MAP_TO_WINTER = {PDT:'PST','UTC-7':'UTC-8', CDT:'CST','UTC-5':'UTC-6', EDT:'EST','UTC-4':'UTC-5'};
+let _dstMode = 'winter'; // loaded from Redis after initializeData
 
 function toggleDST(){
     const toSummer = _dstMode === 'winter';
@@ -733,6 +750,7 @@ function toggleDST(){
     _dstMode = toSummer ? 'summer' : 'winter';
 
     // Update every player's stored timezone
+    const saves = [];
     let changed = 0;
     Object.keys(teamData).forEach(name => {
         const tz = teamData[name].timezone;
@@ -740,26 +758,42 @@ function toggleDST(){
             teamData[name].timezone = map[tz];
             teamData[name].updatedAt = new Date().toISOString();
             changed++;
-            // Persist to API
-            savePlayerToAPI(name, teamData[name]).catch(()=>{});
+            saves.push(savePlayerToAPI(name, teamData[name]));
         }
     });
 
-    // Update button label
-    const btn = document.getElementById('dstToggleBtn');
-    btn.textContent = toSummer ? '☀️ Summer' : '🕐 Winter';
-    btn.style.borderColor = toSummer ? 'var(--accent2)' : '';
-    btn.style.color       = toSummer ? 'var(--accent2)' : '';
+    // Persist mode to Redis
+    saveDSTModeToAPI(_dstMode);
 
-    // Refresh UI
+    // Refresh UI immediately
     updateView();
     updatePlayersList();
     populatePlayerSelects();
+    applyDSTButtonState();
 
-    showStatus(toSummer
-        ? `☀️ Summer — ${changed} player${changed!==1?'s':''} → EDT/CDT/PDT`
-        : `❄️ Winter — ${changed} player${changed!==1?'s':''} → EST/CST/PST`
-    );
+    if(changed === 0){
+        showStatus('No players with DST-affected timezones found');
+        return;
+    }
+
+    showStatus(`⏳ Saving ${changed} player${changed!==1?'s':''}…`);
+
+    // Await all API saves and report result
+    Promise.all(saves)
+        .then(() => showStatus(toSummer
+            ? `☀️ Summer — ${changed} player${changed!==1?'s':''} → EDT/CDT/PDT`
+            : `❄️ Winter — ${changed} player${changed!==1?'s':''} → EST/CST/PST`
+        ))
+        .catch(() => showStatus('⚠️ DST shift failed — check API', true));
+}
+
+function applyDSTButtonState(){
+    const btn = document.getElementById('dstToggleBtn');
+    if(!btn) return;
+    const isSummer = _dstMode === 'summer';
+    btn.textContent = isSummer ? '☀️ Summer' : '🕐 Winter';
+    btn.style.borderColor = isSummer ? 'var(--accent2)' : '';
+    btn.style.color       = isSummer ? 'var(--accent2)' : '';
 }
 
 function resetFilters(){ document.getElementById('userTimezone').value='UTC'; for(let o of document.getElementById('playerFilter').options)o.selected=true; for(let o of document.getElementById('dayFilter').options)o.selected=true; updateView(); }
