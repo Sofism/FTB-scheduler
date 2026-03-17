@@ -197,7 +197,9 @@
     .exc-tooltip-status { color:var(--text-sec); font-size:.85em; margin-top:1px; }
 
     /* BEST WINDOWS */
-    .best-windows-header { display:flex; align-items:center; gap:10px; margin-bottom:9px; flex-wrap:wrap; }
+    .best-windows-header { display:flex; align-items:center; gap:10px; margin-bottom:9px; flex-wrap:wrap; transition:background .15s; border-radius:6px; padding:4px 8px; margin-left:-8px; }
+    .best-windows-header:hover { background:var(--tab-hover); }
+    .best-windows-header h3 { user-select:none; }
     .best-windows-header h3 { font-family:'Barlow Condensed',sans-serif; font-size:.76em; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-sec); }
     .windows-list { display:flex; flex-direction:column; gap:4px; margin-bottom:14px; }
     .window-row { display:flex; align-items:center; flex-wrap:wrap; background:var(--bg-panel); border:1px solid var(--border); border-radius:6px; overflow:hidden; cursor:pointer; transition:border-color .15s; }
@@ -738,7 +740,7 @@ function updateBestTimes(av,userTZ,selD){
     <h3 id="bestWindowsTitle">▼ Best Windows To Play</h3>
     <span style="font-size:.7em;color:var(--text-sec);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">${sub}</span>
 </div>`;    if(grouped.length>0){
-        html+='<div class="windows-list">';
+    html+='<div class="windows-list" id="bestWindowsList">';
         grouped.forEach((w,idx)=>{
             const s=convertTime(w.startUTC,'UTC',userTZ).toString().padStart(2,'0')+':00';
             const e=convertTime(w.endUTC,'UTC',userTZ).toString().padStart(2,'0')+':00';
@@ -1164,6 +1166,21 @@ function applyStoredTheme(){ let t='dark'; try{t=localStorage.getItem('ftb-theme
 
 applyStoredTheme();
 initializeData();
+    let _bestWindowsExpanded = false; // Estado inicial: expandido
+
+    function toggleBestWindows(){
+    _bestWindowsExpanded = !_bestWindowsExpanded;
+    const list = document.getElementById('bestWindowsList');
+    const title = document.getElementById('bestWindowsTitle');
+    
+    if(_bestWindowsExpanded){
+        list.style.display = 'flex';
+        title.textContent = '▼ Best Windows To Play';
+    } else {
+        list.style.display = 'none';
+        title.textContent = '▶ Best Windows To Play';
+    }
+}
 </script>
 
 <div id="excTooltip" class="exc-tooltip"><div class="exc-tooltip-title">⚡ Exceptions</div><div id="excTooltipBody"></div></div>
