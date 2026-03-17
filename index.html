@@ -764,6 +764,16 @@ function updateBestTimes(av,userTZ,selD){
         html+='</div>';
     } else { html+=`<p style="color:var(--text-sec);font-size:.84em;padding:6px 0">No windows with 5+ players found.</p>`; }
     document.getElementById('bestTimes').innerHTML=html;
+
+// Aplicar estado colapsado inicial
+setTimeout(() => {
+    const list = document.getElementById('bestWindowsList');
+    const title = document.getElementById('bestWindowsTitle');
+    if(list && title && !_bestWindowsExpanded){
+        list.style.display = 'none';
+        title.textContent = '▶ Best Windows To Play';
+    }
+}, 0);
 }
 function toggleWP(idx){ const l=document.getElementById('wp-'+idx),t=document.getElementById('tg-'+idx),o=l.classList.toggle('open'); t.textContent=o?'▴ hide':'▾ '+t.dataset.count; }
 
