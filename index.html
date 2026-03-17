@@ -734,8 +734,10 @@ function updateBestTimes(av,userTZ,selD){
     grouped.sort((a,b)=>b.peak-a.peak||a.startUTC-b.startUTC);
     const total=raw.length;
     const sub=total===0?'':`${total} slot${total!==1?'s':''} · ${grouped.length} group${grouped.length!==1?'s':''} · click to expand`;
-    let html=`<div class="best-windows-header"><h3>▶ Best Windows To Play</h3><span style="font-size:.7em;color:var(--text-sec);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">${sub}</span></div>`;
-    if(grouped.length>0){
+    let html=`<div class="best-windows-header" onclick="toggleBestWindows()" style="cursor:pointer;">
+    <h3 id="bestWindowsTitle">▼ Best Windows To Play</h3>
+    <span style="font-size:.7em;color:var(--text-sec);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px">${sub}</span>
+</div>`;    if(grouped.length>0){
         html+='<div class="windows-list">';
         grouped.forEach((w,idx)=>{
             const s=convertTime(w.startUTC,'UTC',userTZ).toString().padStart(2,'0')+':00';
