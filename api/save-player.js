@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
         const totalHours = Object.values(playerData.availability || {})
           .reduce((s, h) => s + h.length, 0);
         const excCount = (playerData.exceptions || []).length;
-        const excNote = excCount > 0 ? ' · ' + excCount + (excCount !== 1 ? ' exceptio
+        const excNote = excCount > 0 ? ' · ' + excCount + (excCount !== 1 ? ' exceptions' : 'exeption') '';
         const action = isNew ? 'joined the roster' : 'updated their schedule';
         await fetch(webhookUrl, {
           method: 'POST',
