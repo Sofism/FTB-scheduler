@@ -529,10 +529,24 @@ async function initializeData(){
         teamData = json.data && Object.keys(json.data).length
             ? json.data
             : JSON.parse(JSON.stringify(initialTeamData));
+        
         // Restore DST mode saved in Redis
-        if(teamData.__dstMode){ _dstMode = teamData.__dstMode; delete teamData.__dstMode; }
+        if(teamData.__dstMode){
+            // Si está guardado como string (formato viejo)
+            if(typeof teamData.__dstMode === 'string'){
+                _dstMode = teamData.__dstMode;
+            }
+            // Si está guardado como objeto (formato nuevo)
+            else if(teamData.__dstMode.mode){
+                _dstMode = teamData.__dstMode.mode;
+            }
+            delete teamData.__dstMode;
+        }
+        
         // Ensure exceptions array on every player
-        Object.keys(teamData).forEach(p=>{ if(!teamData[p].exceptions) teamData[p].exceptions=[]; });
+        Object.keys(teamData).forEach(p=>{ 
+            if(!teamData[p].exceptions) teamData[p].exceptions=[]; 
+        });
     } catch(e) {
         console.warn('API unavailable, using initial data:', e);
         teamData = JSON.parse(JSON.stringify(initialTeamData));
@@ -540,7 +554,6 @@ async function initializeData(){
     populatePlayerSelects(); generateDayForms(); updateView(); updatePlayersList();
     applyDSTButtonState();
 }
-
 async function savePlayerToAPI(name, playerData){
     const res = await fetch('/api/save-player', {
         method: 'POST',
@@ -553,12 +566,25 @@ async function savePlayerToAPI(name, playerData){
 
 async function saveDSTModeToAPI(mode){
     try {
+        // Guardar el modo DST como si fuera un "jugador" especial
         await fetch('/api/save-player', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: '__dstMode', playerData: mode })
+            body: JSON.stringify({ 
+                name: '__dstMode', 
+                playerData: {
+                    mode: mode,  // 'winter' o 'summer'
+                    timezone: 'UTC',
+                    availability: {},
+                    notes: 'DST mode setting',
+                    exceptions: []
+                }
+            })
         });
-    } catch(e) { console.warn('DST mode save failed:', e); }
+        console.log('DST mode saved:', mode);
+    } catch(e) { 
+        console.warn('DST mode save failed:', e); 
+    }
 }
 
 async function deletePlayerFromAPI(name){
