@@ -992,8 +992,8 @@ function confirmAddPlayer(){
 }
 
 // ── Admin password check (SHA-256 of password, never stored in plain text) ──
-const ADMIN_HASH = '014ae491b878de31a229c5c7193098caa08e9ec41819a322ad5fbb4f42d04b80';
-async function sha256(str){
+const ADMIN_HASH = '44093600f9dd4a16b7b7945d5f4a1ab6846c85c217208b44ef27a8b5d7514b8b';
+    async function sha256(str){
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
